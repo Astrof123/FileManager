@@ -1,0 +1,21 @@
+{
+  "name": "filemanager-vanilla",
+  "version": "1.0.0",
+  "description": "Vanilla Javascript file manager",
+  "main": "dist/filemanager.bundle.js",
+  "module": "src/filemanager.js",
+  "browser": "dist/filemanager.bundle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "file",
+    "manager"
+  ],
+  "author": "Gleb Valeev",
+  "license": "MIT",
+  "devDependencies": {
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4"
+  }
+}
