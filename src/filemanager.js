@@ -8,13 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-
 export class FileManagerServer {
 }
-
 export class FileManager {
     constructor(root, FileManagerServer, rootFolderName = 'Root') {
         this.image_extension = ['png', 'jpg', 'jpeg', 'webp'];
+        this.lastFolders = [];
         this.rootFolderName = rootFolderName;
         this.FileManagerServer = FileManagerServer;
         if (!(root instanceof HTMLElement)) {
@@ -44,7 +43,7 @@ export class FileManager {
             }
             else {
                 file_iconHTML.src = "icons/textfile.png";
-                file_typeHTML.textContent = "File";
+                file_typeHTML.textContent = "Text File";
             }
         }
         let file_nameHTML = document.createElement("span");
@@ -58,7 +57,25 @@ export class FileManager {
         let file_sizeHTML = document.createElement("span");
         file_sizeHTML.classList.add("file_size");
         file_sizeHTML.classList.add("file_metadata");
-        file_sizeHTML.textContent = file.isFolder ? "" : file.size;
+        if (!file.isFolder) {
+            // let size = Number(file.size.replace(/^\D+/g, ''));
+            const match = file.size.match(/-?\d+(\.\d+)?/);
+            let size = match ? parseFloat(match[0]) : NaN;
+            if (size > 1024) {
+                size = size / 1024;
+                file_sizeHTML.textContent = String(Math.round(size * 10) / 10) + " КБ";
+            }
+            else if (size > 1024 * 1024) {
+                size = size / (1024 * 1024);
+                file_sizeHTML.textContent = String(Math.round(size * 10) / 10) + " МБ";
+            }
+            else {
+                file_sizeHTML.textContent = String(size) + " Байт";
+            }
+        }
+        else {
+            file_sizeHTML.textContent = "";
+        }
         file_blockHTML.append(file_iconHTML);
         file_blockHTML.append(file_nameHTML);
         file_blockHTML.append(file_changedateHTML);
@@ -140,7 +157,7 @@ export class FileManager {
             }
         });
     }
-    handleOpenNavFolderClick(event) {
+    handleOpenNavFolder(event) {
         event.stopPropagation();
         if (event.target != null && event.target instanceof HTMLElement) {
             let targetElem = event.target;
@@ -188,29 +205,49 @@ export class FileManager {
             throw new Error('The hierarchy of elements was violated');
         }
     }
-    handleShowFileListClick(event) {
+    focusNavFolder(folder_parent, back) {
         var _a;
-        event.stopPropagation();
-        if (event.target != null && event.target instanceof HTMLElement) {
-            let targetElem = event.target;
-            let folder_wrapper = targetElem.closest('.folder_wrapper');
-            let folder_parent = targetElem.closest('.folder_parent');
-            let folder_name = folder_parent === null || folder_parent === void 0 ? void 0 : folder_parent.querySelector(".folder_name");
-            if (folder_wrapper != null && folder_parent != null && folder_name != null && folder_parent instanceof HTMLElement && folder_name.textContent) {
-                let path = this.getPath(folder_wrapper, folder_name.textContent);
-                if (folder_parent !== this.currentFolder) {
-                    (_a = this.currentFolder) === null || _a === void 0 ? void 0 : _a.classList.remove("folder_parent__opened");
-                    folder_parent === null || folder_parent === void 0 ? void 0 : folder_parent.classList.add("folder_parent__opened");
-                    this.currentFolder = folder_parent;
+        if (folder_parent !== this.currentFolder) {
+            if (this.currentFolder) {
+                (_a = this.currentFolder) === null || _a === void 0 ? void 0 : _a.classList.remove("folder_parent__opened");
+                if (!back) {
+                    this.lastFolders.push(this.currentFolder);
                 }
-                this.getInternalFiles(path);
             }
-            else {
-                throw new Error('The hierarchy of elements was violated');
-            }
+            folder_parent === null || folder_parent === void 0 ? void 0 : folder_parent.classList.add("folder_parent__opened");
+            this.currentFolder = folder_parent;
+        }
+    }
+    showFileList(targetElement, back = false) {
+        let folder_wrapper = targetElement.closest('.folder_wrapper');
+        let folder_parent = targetElement.closest('.folder_parent');
+        let folder_name = folder_parent === null || folder_parent === void 0 ? void 0 : folder_parent.querySelector(".folder_name");
+        if (folder_wrapper != null && folder_parent != null && folder_name != null && folder_parent instanceof HTMLElement && folder_name.textContent) {
+            let path = this.getPath(folder_wrapper, folder_name.textContent);
+            this.focusNavFolder(folder_parent, back);
+            this.getInternalFiles(path);
         }
         else {
             throw new Error('The hierarchy of elements was violated');
+        }
+    }
+    handleShowFileList(event) {
+        event.stopPropagation();
+        if (event.target != null && event.target instanceof HTMLElement) {
+            let targetElem = event.target;
+            this.showFileList(targetElem);
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+    }
+    handleBackArrowClick(event) {
+        event.stopPropagation();
+        if (this.lastFolders.length > 0) {
+            let lastFolder = this.lastFolders.pop();
+            if (lastFolder) {
+                this.showFileList(lastFolder, true);
+            }
         }
     }
     handleOpenFileListFolder(event) {
@@ -240,6 +277,9 @@ export class FileManager {
                         let path = this.getPath(newCurrentFolderWrapper, file_name === null || file_name === void 0 ? void 0 : file_name.textContent);
                         (_d = this.currentFolder) === null || _d === void 0 ? void 0 : _d.classList.remove("folder_parent__opened");
                         newCurrentFolder.classList.add("folder_parent__opened");
+                        if (this.currentFolder) {
+                            this.lastFolders.push(this.currentFolder);
+                        }
                         this.currentFolder = newCurrentFolder;
                         if (this.files_listHTML != null) {
                             this.files_listHTML.innerHTML = "";
@@ -264,8 +304,8 @@ export class FileManager {
                     var _a, _b;
                     let newfolder = this.createHTMLNavFolder(folder, folder_children);
                     if (newfolder) {
-                        (_a = newfolder[0]) === null || _a === void 0 ? void 0 : _a.addEventListener("click", this.handleOpenNavFolderClick.bind(this));
-                        (_b = newfolder[1]) === null || _b === void 0 ? void 0 : _b.addEventListener("click", this.handleShowFileListClick.bind(this));
+                        (_a = newfolder[0]) === null || _a === void 0 ? void 0 : _a.addEventListener("click", this.handleOpenNavFolder.bind(this));
+                        (_b = newfolder[1]) === null || _b === void 0 ? void 0 : _b.addEventListener("click", this.handleShowFileList.bind(this));
                     }
                 });
             }
@@ -299,8 +339,8 @@ export class FileManager {
             if (rootfolder_wrapper) {
                 rootfolder_wrapper.classList.add("folder_root_wrapper");
             }
-            rootfolder_icon_wrapper === null || rootfolder_icon_wrapper === void 0 ? void 0 : rootfolder_icon_wrapper.addEventListener("click", this.handleOpenNavFolderClick.bind(this));
-            rootfolder_parent === null || rootfolder_parent === void 0 ? void 0 : rootfolder_parent.addEventListener("click", this.handleShowFileListClick.bind(this));
+            rootfolder_icon_wrapper === null || rootfolder_icon_wrapper === void 0 ? void 0 : rootfolder_icon_wrapper.addEventListener("click", this.handleOpenNavFolder.bind(this));
+            rootfolder_parent === null || rootfolder_parent === void 0 ? void 0 : rootfolder_parent.addEventListener("click", this.handleShowFileList.bind(this));
         }
         filemanager_mainHTML.append(folders_navHTML);
         // Creating files_panel
