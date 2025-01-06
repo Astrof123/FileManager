@@ -16,11 +16,27 @@ export class FileManager {
         this.lastFolders = [];
         this.rootFolderName = rootFolderName;
         this.FileManagerServer = FileManagerServer;
+        this.arrowsState = {
+            back_arrow: true,
+            up_arrow: false,
+        };
         if (!(root instanceof HTMLElement)) {
             throw new SyntaxError("An empty or invalid variable type was passed.");
         }
         this.root = root;
         this.initInterface();
+        let back_arrow = this.root.querySelector(".arrow_back");
+        let up_arrow = this.root.querySelector(".arrow_up");
+        if (back_arrow instanceof HTMLElement && up_arrow instanceof HTMLElement) {
+            this.arrowsElements = {
+                back_arrow: back_arrow,
+                up_arrow: up_arrow,
+            };
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        this.checkBackArrow();
     }
     createHTMLFileList(file) {
         var _a;
@@ -135,6 +151,8 @@ export class FileManager {
                         if (folder_name === null || folder_name === void 0 ? void 0 : folder_name.textContent) {
                             let path = this.getPath(folder_wrapper, folder_name === null || folder_name === void 0 ? void 0 : folder_name.textContent);
                             yield this.getInternalFolders(folder_children, path);
+                            this.checkUpArrow(path);
+                            this.checkBackArrow();
                         }
                         else {
                             throw new Error('The hierarchy of elements was violated');
@@ -226,6 +244,8 @@ export class FileManager {
             let path = this.getPath(folder_wrapper, folder_name.textContent);
             this.focusNavFolder(folder_parent, back);
             this.getInternalFiles(path);
+            this.checkUpArrow(path);
+            this.checkBackArrow();
         }
         else {
             throw new Error('The hierarchy of elements was violated');
@@ -241,12 +261,47 @@ export class FileManager {
             throw new Error('The hierarchy of elements was violated');
         }
     }
+    checkBackArrow() {
+        if (this.lastFolders.length > 0 && !this.arrowsState.back_arrow) {
+            this.arrowsState.back_arrow = true;
+            this.arrowsElements.back_arrow.classList.remove("disabled");
+            this.arrowsElements.back_arrow.style.pointerEvents = 'auto';
+        }
+        else if (this.lastFolders.length === 0 && this.arrowsState.back_arrow) {
+            this.arrowsState.back_arrow = false;
+            this.arrowsElements.back_arrow.classList.add("disabled");
+            this.arrowsElements.back_arrow.style.pointerEvents = 'none';
+        }
+    }
+    checkUpArrow(path) {
+        if (path !== "/" && !this.arrowsState.up_arrow) {
+            this.arrowsState.up_arrow = true;
+            this.arrowsElements.up_arrow.classList.remove("disabled");
+            this.arrowsElements.up_arrow.style.pointerEvents = 'auto';
+        }
+        else if (path === "/" && this.arrowsState.up_arrow) {
+            this.arrowsState.up_arrow = false;
+            this.arrowsElements.up_arrow.classList.add("disabled");
+            this.arrowsElements.up_arrow.style.pointerEvents = 'none';
+        }
+    }
     handleBackArrowClick(event) {
         event.stopPropagation();
         if (this.lastFolders.length > 0) {
             let lastFolder = this.lastFolders.pop();
             if (lastFolder) {
                 this.showFileList(lastFolder, true);
+            }
+        }
+    }
+    handleUpArrowClick(event) {
+        var _a, _b, _c;
+        event.stopPropagation();
+        if (this.currentFolder instanceof HTMLElement) {
+            let folder_wrapper = (_c = (_b = (_a = this.currentFolder) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.parentElement) === null || _c === void 0 ? void 0 : _c.parentElement;
+            let folder_parent = folder_wrapper === null || folder_wrapper === void 0 ? void 0 : folder_wrapper.querySelector('.folder_parent');
+            if (folder_parent instanceof HTMLElement) {
+                this.showFileList(folder_parent, true);
             }
         }
     }
@@ -284,6 +339,8 @@ export class FileManager {
                         if (this.files_listHTML != null) {
                             this.files_listHTML.innerHTML = "";
                             this.getInternalFiles(path);
+                            this.checkUpArrow(path);
+                            this.checkBackArrow();
                         }
                     }
                     else {
@@ -326,8 +383,58 @@ export class FileManager {
         });
     }
     initInterface() {
+        // Creating filemanager_navigation
+        let filemanager_navigationHTML = document.createElement("div");
+        filemanager_navigationHTML.classList.add("filemanager_navigation");
+        let arrows_blockHTML = document.createElement("div");
+        arrows_blockHTML.classList.add("arrows_block");
+        let current_pathHTML = document.createElement("div");
+        current_pathHTML.classList.add("current_path");
+        let searchHTML = document.createElement("input");
+        searchHTML.type = "text";
+        searchHTML.placeholder = "Searching";
+        searchHTML.classList.add("search");
+        let arrow_backHTML = document.createElement("div");
+        arrow_backHTML.classList.add("arrow_wrapper");
+        arrow_backHTML.classList.add("arrow_back");
+        arrow_backHTML.addEventListener('click', this.handleBackArrowClick.bind(this));
+        let arrow_upHTML = document.createElement("div");
+        arrow_upHTML.classList.add("arrow_wrapper");
+        arrow_upHTML.classList.add("arrow_up");
+        arrow_upHTML.classList.add("disabled");
+        arrow_upHTML.style.pointerEvents = 'none';
+        arrow_upHTML.addEventListener('click', this.handleUpArrowClick.bind(this));
+        let arrow_refreshHTML = document.createElement("div");
+        arrow_refreshHTML.classList.add("arrow_wrapper");
+        arrow_refreshHTML.classList.add("arrow_refresh");
+        let arrow_backIMG = document.createElement("img");
+        arrow_backIMG.classList.add("filemanager_arrow");
+        arrow_backIMG.src = "/icons/next-left.png";
+        let arrow_upIMG = document.createElement("img");
+        arrow_upIMG.classList.add("filemanager_arrow");
+        arrow_upIMG.src = "/icons/next-upper.png";
+        let arrow_refreshIMG = document.createElement("img");
+        arrow_refreshIMG.classList.add("filemanager_arrow");
+        arrow_refreshIMG.src = "/icons/refresh.png";
+        arrow_backHTML.append(arrow_backIMG);
+        arrow_upHTML.append(arrow_upIMG);
+        arrow_refreshHTML.append(arrow_refreshIMG);
+        arrows_blockHTML.append(arrow_backHTML);
+        arrows_blockHTML.append(arrow_upHTML);
+        arrows_blockHTML.append(arrow_refreshHTML);
+        let path_folderHTML = document.createElement("span");
+        path_folderHTML.classList.add("path_folder");
+        path_folderHTML.textContent = "Root";
+        current_pathHTML.append(path_folderHTML);
+        filemanager_navigationHTML.append(arrows_blockHTML);
+        filemanager_navigationHTML.append(current_pathHTML);
+        filemanager_navigationHTML.append(searchHTML);
+        this.root.append(filemanager_navigationHTML);
         let filemanager_mainHTML = document.createElement("div");
         filemanager_mainHTML.classList.add("filemanager_main");
+        // Creating filemanager_tools
+        // let filemanager_toolsHTML = document.createElement("div");
+        // filemanager_toolsHTML.classList.add("filemanager_tools");
         // Creating folders_nav
         let folders_navHTML = document.createElement("div");
         folders_navHTML.classList.add("folders_nav");
