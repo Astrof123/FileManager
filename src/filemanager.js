@@ -25,6 +25,13 @@ export class FileManager {
         }
         this.root = root;
         this.initInterface();
+        let buffer = this.root.querySelector(".current_path");
+        if (buffer instanceof HTMLElement) {
+            this.currentPathElem = buffer;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
         let back_arrow = this.root.querySelector(".arrow_back");
         let up_arrow = this.root.querySelector(".arrow_up");
         if (back_arrow instanceof HTMLElement && up_arrow instanceof HTMLElement) {
@@ -36,7 +43,7 @@ export class FileManager {
         else {
             throw new Error('The hierarchy of elements was violated');
         }
-        this.checkBackArrow();
+        this.updateBackArrow();
     }
     createHTMLFileList(file) {
         var _a;
@@ -151,8 +158,9 @@ export class FileManager {
                         if (folder_name === null || folder_name === void 0 ? void 0 : folder_name.textContent) {
                             let path = this.getPath(folder_wrapper, folder_name === null || folder_name === void 0 ? void 0 : folder_name.textContent);
                             yield this.getInternalFolders(folder_children, path);
-                            this.checkUpArrow(path);
-                            this.checkBackArrow();
+                            this.updateUpArrow(path);
+                            this.updateCurrentPath(path);
+                            this.updateBackArrow();
                         }
                         else {
                             throw new Error('The hierarchy of elements was violated');
@@ -244,8 +252,9 @@ export class FileManager {
             let path = this.getPath(folder_wrapper, folder_name.textContent);
             this.focusNavFolder(folder_parent, back);
             this.getInternalFiles(path);
-            this.checkUpArrow(path);
-            this.checkBackArrow();
+            this.updateUpArrow(path);
+            this.updateBackArrow();
+            this.updateCurrentPath(path);
         }
         else {
             throw new Error('The hierarchy of elements was violated');
@@ -261,7 +270,7 @@ export class FileManager {
             throw new Error('The hierarchy of elements was violated');
         }
     }
-    checkBackArrow() {
+    updateBackArrow() {
         if (this.lastFolders.length > 0 && !this.arrowsState.back_arrow) {
             this.arrowsState.back_arrow = true;
             this.arrowsElements.back_arrow.classList.remove("disabled");
@@ -273,7 +282,7 @@ export class FileManager {
             this.arrowsElements.back_arrow.style.pointerEvents = 'none';
         }
     }
-    checkUpArrow(path) {
+    updateUpArrow(path) {
         if (path !== "/" && !this.arrowsState.up_arrow) {
             this.arrowsState.up_arrow = true;
             this.arrowsElements.up_arrow.classList.remove("disabled");
@@ -283,6 +292,26 @@ export class FileManager {
             this.arrowsState.up_arrow = false;
             this.arrowsElements.up_arrow.classList.add("disabled");
             this.arrowsElements.up_arrow.style.pointerEvents = 'none';
+        }
+    }
+    updateCurrentPath(path) {
+        this.currentPathElem.innerHTML = "";
+        let path_elements = path.split("/");
+        let root_path = document.createElement("span");
+        root_path.classList.add("path_folder");
+        root_path.textContent = this.rootFolderName;
+        this.currentPathElem.append(root_path);
+        if (path_elements[1] !== '') {
+            for (let i = 1; i < path_elements.length; i++) {
+                let path_img = document.createElement("img");
+                path_img.classList.add("path_arrow");
+                path_img.src = "icons/arrow-right.png";
+                let path_folder = document.createElement("span");
+                path_folder.classList.add("path_folder");
+                path_folder.textContent = path_elements[i];
+                this.currentPathElem.append(path_img);
+                this.currentPathElem.append(path_folder);
+            }
         }
     }
     handleBackArrowClick(event) {
@@ -303,6 +332,12 @@ export class FileManager {
             if (folder_parent instanceof HTMLElement) {
                 this.showFileList(folder_parent, true);
             }
+        }
+    }
+    handleRefreshClick(event) {
+        event.stopPropagation();
+        if (this.currentFolder instanceof HTMLElement) {
+            this.showFileList(this.currentFolder, true);
         }
     }
     handleOpenFileListFolder(event) {
@@ -339,8 +374,9 @@ export class FileManager {
                         if (this.files_listHTML != null) {
                             this.files_listHTML.innerHTML = "";
                             this.getInternalFiles(path);
-                            this.checkUpArrow(path);
-                            this.checkBackArrow();
+                            this.updateUpArrow(path);
+                            this.updateCurrentPath(path);
+                            this.updateBackArrow();
                         }
                     }
                     else {
@@ -407,6 +443,7 @@ export class FileManager {
         let arrow_refreshHTML = document.createElement("div");
         arrow_refreshHTML.classList.add("arrow_wrapper");
         arrow_refreshHTML.classList.add("arrow_refresh");
+        arrow_refreshHTML.addEventListener('click', this.handleRefreshClick.bind(this));
         let arrow_backIMG = document.createElement("img");
         arrow_backIMG.classList.add("filemanager_arrow");
         arrow_backIMG.src = "/icons/next-left.png";
@@ -424,7 +461,7 @@ export class FileManager {
         arrows_blockHTML.append(arrow_refreshHTML);
         let path_folderHTML = document.createElement("span");
         path_folderHTML.classList.add("path_folder");
-        path_folderHTML.textContent = "Root";
+        path_folderHTML.textContent = this.rootFolderName;
         current_pathHTML.append(path_folderHTML);
         filemanager_navigationHTML.append(arrows_blockHTML);
         filemanager_navigationHTML.append(current_pathHTML);
@@ -433,8 +470,58 @@ export class FileManager {
         let filemanager_mainHTML = document.createElement("div");
         filemanager_mainHTML.classList.add("filemanager_main");
         // Creating filemanager_tools
-        // let filemanager_toolsHTML = document.createElement("div");
-        // filemanager_toolsHTML.classList.add("filemanager_tools");
+        let filemanager_toolsHTML = document.createElement("div");
+        filemanager_toolsHTML.classList.add("filemanager_tools");
+        let add_file_buttonHTML = document.createElement("button");
+        add_file_buttonHTML.type = "button";
+        add_file_buttonHTML.classList.add("add_file_button");
+        let add_file_iconHTML = document.createElement("img");
+        add_file_iconHTML.src = "icons/sticky-notes.png";
+        add_file_iconHTML.classList.add("add_file_icon");
+        add_file_buttonHTML.append(add_file_iconHTML);
+        let add_file_spanHTML = document.createElement("span");
+        add_file_spanHTML.textContent = "Загрузить";
+        add_file_buttonHTML.append(add_file_spanHTML);
+        let cutHTML = document.createElement("img");
+        cutHTML.src = "icons/cut2.png";
+        cutHTML.classList.add("tool");
+        cutHTML.classList.add("cut");
+        let duplicateHTML = document.createElement("img");
+        duplicateHTML.src = "icons/duplicate.png";
+        duplicateHTML.classList.add("tool");
+        duplicateHTML.classList.add("duplicate");
+        let insertHTML = document.createElement("img");
+        insertHTML.src = "icons/insert.png";
+        insertHTML.classList.add("tool");
+        insertHTML.classList.add("insert");
+        let renameHTML = document.createElement("img");
+        renameHTML.src = "icons/rename.png";
+        renameHTML.classList.add("tool");
+        renameHTML.classList.add("rename");
+        let removeHTML = document.createElement("img");
+        removeHTML.src = "icons/remove.png";
+        removeHTML.classList.add("tool");
+        removeHTML.classList.add("remove");
+        let grid_wrapperHTML = document.createElement("div");
+        grid_wrapperHTML.classList.add("grid_wrapper");
+        let tableHTML = document.createElement("img");
+        tableHTML.src = "icons/table.png";
+        tableHTML.classList.add("tool");
+        tableHTML.classList.add("table");
+        let gridHTML = document.createElement("img");
+        gridHTML.src = "icons/grid.png";
+        gridHTML.classList.add("tool");
+        gridHTML.classList.add("grid");
+        grid_wrapperHTML.append(tableHTML);
+        grid_wrapperHTML.append(gridHTML);
+        filemanager_toolsHTML.append(add_file_buttonHTML);
+        filemanager_toolsHTML.append(cutHTML);
+        filemanager_toolsHTML.append(duplicateHTML);
+        filemanager_toolsHTML.append(insertHTML);
+        filemanager_toolsHTML.append(renameHTML);
+        filemanager_toolsHTML.append(removeHTML);
+        filemanager_toolsHTML.append(grid_wrapperHTML);
+        this.root.append(filemanager_toolsHTML);
         // Creating folders_nav
         let folders_navHTML = document.createElement("div");
         folders_navHTML.classList.add("folders_nav");
