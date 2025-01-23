@@ -204,6 +204,7 @@ class FileManager {
                             yield this.getInternalFolders(folder_children, path);
                             this.updateUpArrow(path);
                             this.updateRemove();
+                            this.updateRename();
                             this.updateCurrentPath(path);
                             this.updateBackArrow();
                         }
@@ -278,6 +279,8 @@ class FileManager {
     }
     focusNavFolder(folder_parent, back) {
         var _a;
+        console.log(this.currentFolder);
+        console.log(folder_parent);
         if (folder_parent !== this.currentFolder) {
             if (this.currentFolder) {
                 (_a = this.currentFolder) === null || _a === void 0 ? void 0 : _a.classList.remove("folder_parent__opened");
@@ -408,6 +411,7 @@ class FileManager {
                 this.getInternalFiles(this.currentPath);
                 this.updateUpArrow(this.currentPath);
                 this.updateRemove();
+                this.updateRename();
                 this.updateCurrentPath(this.currentPath);
                 this.updateBackArrow();
                 input_file.value = "";
@@ -432,6 +436,7 @@ class FileManager {
                 this.getInternalFiles(this.currentPath);
                 this.updateUpArrow(this.currentPath);
                 this.updateRemove();
+                this.updateRename();
                 this.updateCurrentPath(this.currentPath);
                 this.updateBackArrow();
                 input_folder.value = "";
@@ -501,13 +506,26 @@ class FileManager {
             this.toolsElements.remove.style.pointerEvents = 'none';
         }
     }
+    updateRename() {
+        if (this.currentFile !== null && this.currentFilePath !== "/") {
+            this.toolsState.rename = true;
+            this.toolsElements.rename.classList.remove("disabled");
+            this.toolsElements.rename.style.pointerEvents = 'auto';
+        }
+        else {
+            this.toolsState.rename = false;
+            this.toolsElements.rename.classList.add("disabled");
+            this.toolsElements.rename.style.pointerEvents = 'none';
+        }
+    }
     clearCurrentFile() {
         if (this.currentFile) {
-            this.currentFile.classList.remove("opened");
+            this.currentFile.classList.remove("openedFile");
         }
         this.currentFile = null;
         this.currentFilePath = '/';
         this.updateRemove();
+        this.updateRename();
     }
     handleFilemanagerClick(event) {
         if (event.target instanceof HTMLElement && !event.target.closest(".file_block")) {
@@ -533,20 +551,62 @@ class FileManager {
             }
         });
     }
+    handleRenameClick(event) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            event.stopPropagation();
+            if (this.currentFile instanceof HTMLElement) {
+                const originalTextElem = (_a = this.currentFile) === null || _a === void 0 ? void 0 : _a.querySelector(".file_name");
+                if (originalTextElem instanceof HTMLElement && originalTextElem.textContent) {
+                    const inputElement = document.createElement('input');
+                    inputElement.type = 'text';
+                    inputElement.value = originalTextElem.textContent;
+                    inputElement.classList.add("file_name");
+                    this.currentFile.replaceChild(inputElement, originalTextElem);
+                    inputElement.focus();
+                    let bufferThis = this;
+                    inputElement.addEventListener('blur', function () {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            const newTextElement = document.createElement('span');
+                            newTextElement.textContent = inputElement.value;
+                            newTextElement.classList.add("file_name");
+                            newTextElement.classList.add("file_metadata");
+                            if (bufferThis.currentFile instanceof HTMLElement) {
+                                bufferThis.currentFile.replaceChild(newTextElement, inputElement);
+                                try {
+                                    yield bufferThis.FileManagerServer.renameFileOrFolder(bufferThis.currentPath + "/" + bufferThis.currentFilePath, bufferThis.currentPath + "/" + newTextElement.textContent);
+                                    if (bufferThis.currentFolder instanceof HTMLElement) {
+                                        bufferThis.showFileList(bufferThis.currentFolder, true);
+                                    }
+                                    else {
+                                        throw new Error('The hierarchy of elements was violated');
+                                    }
+                                }
+                                catch (error) {
+                                    throw error;
+                                }
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    }
     handleFileClick(event) {
         if (event.target instanceof HTMLElement) {
             const file_block = event.target.closest(".file_block");
             if (file_block instanceof HTMLDivElement) {
                 if (this.currentFile) {
-                    this.currentFile.classList.remove("opened");
+                    this.currentFile.classList.remove("openedFile");
                 }
-                file_block.classList.add("opened");
+                file_block.classList.add("openedFile");
                 this.currentFile = file_block;
                 const file_name = file_block.querySelector(".file_name");
                 if (file_name instanceof HTMLElement && file_name.textContent) {
                     this.currentFilePath = file_name.textContent;
                 }
                 this.updateRemove();
+                this.updateRename();
             }
         }
     }
@@ -718,6 +778,7 @@ class FileManager {
         renameHTML.src = "icons/rename.png";
         renameHTML.classList.add("tool");
         renameHTML.classList.add("rename");
+        renameHTML.addEventListener("click", this.handleRenameClick.bind(this));
         let removeHTML = document.createElement("img");
         removeHTML.src = "icons/remove.png";
         removeHTML.classList.add("tool");
