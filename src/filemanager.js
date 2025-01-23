@@ -33,7 +33,7 @@ class FileManager {
             throw new SyntaxError("An empty or invalid variable type was passed.");
         }
         this.root = root;
-        // this.root.addEventListener("click", this.handleFilemanagerClick.bind(this));
+        this.root.addEventListener("click", this.handleFilemanagerClick.bind(this));
         this.initInterface();
         let bufferChecker = this.root.querySelector(".upload_files_block");
         if (bufferChecker instanceof HTMLElement) {
@@ -91,7 +91,7 @@ class FileManager {
         var _a;
         let file_blockHTML = document.createElement("div");
         file_blockHTML.classList.add("file_block");
-        // file_blockHTML.addEventListener("click", this.handleFileClick.bind(this));
+        file_blockHTML.addEventListener("click", this.handleFileClick.bind(this));
         let file_iconHTML = document.createElement("img");
         file_iconHTML.classList.add("file_icon");
         let file_typeHTML = document.createElement("span");
@@ -203,7 +203,7 @@ class FileManager {
                             this.currentPath = path;
                             yield this.getInternalFolders(folder_children, path);
                             this.updateUpArrow(path);
-                            // this.updateRemove();
+                            this.updateRemove();
                             this.updateCurrentPath(path);
                             this.updateBackArrow();
                         }
@@ -299,7 +299,7 @@ class FileManager {
             this.focusNavFolder(folder_parent, back);
             this.getInternalFiles(path);
             this.updateUpArrow(path);
-            // this.clearCurrentFile();
+            this.clearCurrentFile();
             this.updateBackArrow();
             this.updateCurrentPath(path);
         }
@@ -407,7 +407,7 @@ class FileManager {
                 }
                 this.getInternalFiles(this.currentPath);
                 this.updateUpArrow(this.currentPath);
-                // this.updateRemove();
+                this.updateRemove();
                 this.updateCurrentPath(this.currentPath);
                 this.updateBackArrow();
                 input_file.value = "";
@@ -431,7 +431,7 @@ class FileManager {
                 }
                 this.getInternalFiles(this.currentPath);
                 this.updateUpArrow(this.currentPath);
-                // this.updateRemove();
+                this.updateRemove();
                 this.updateCurrentPath(this.currentPath);
                 this.updateBackArrow();
                 input_folder.value = "";
@@ -476,7 +476,7 @@ class FileManager {
                             this.updateUpArrow(path);
                             this.updateCurrentPath(path);
                             this.updateBackArrow();
-                            // this.clearCurrentFile();
+                            this.clearCurrentFile();
                         }
                     }
                     else {
@@ -488,6 +488,67 @@ class FileManager {
                 }
             }
         });
+    }
+    updateRemove() {
+        if (this.currentFile !== null && this.currentFilePath !== "/") {
+            this.toolsState.remove = true;
+            this.toolsElements.remove.classList.remove("disabled");
+            this.toolsElements.remove.style.pointerEvents = 'auto';
+        }
+        else {
+            this.toolsState.remove = false;
+            this.toolsElements.remove.classList.add("disabled");
+            this.toolsElements.remove.style.pointerEvents = 'none';
+        }
+    }
+    clearCurrentFile() {
+        if (this.currentFile) {
+            this.currentFile.classList.remove("opened");
+        }
+        this.currentFile = null;
+        this.currentFilePath = '/';
+        this.updateRemove();
+    }
+    handleFilemanagerClick(event) {
+        if (event.target instanceof HTMLElement && !event.target.closest(".file_block")) {
+            this.clearCurrentFile();
+        }
+    }
+    handleRemoveClick(event) {
+        return __awaiter(this, void 0, void 0, function* () {
+            event.stopPropagation();
+            if (this.currentFilePath !== "/") {
+                try {
+                    yield this.FileManagerServer.removeFileOrFolder(this.currentPath + "/" + this.currentFilePath);
+                    if (this.currentFolder instanceof HTMLElement) {
+                        this.showFileList(this.currentFolder, true);
+                    }
+                    else {
+                        throw new Error('The hierarchy of elements was violated');
+                    }
+                }
+                catch (error) {
+                    throw error;
+                }
+            }
+        });
+    }
+    handleFileClick(event) {
+        if (event.target instanceof HTMLElement) {
+            const file_block = event.target.closest(".file_block");
+            if (file_block instanceof HTMLDivElement) {
+                if (this.currentFile) {
+                    this.currentFile.classList.remove("opened");
+                }
+                file_block.classList.add("opened");
+                this.currentFile = file_block;
+                const file_name = file_block.querySelector(".file_name");
+                if (file_name instanceof HTMLElement && file_name.textContent) {
+                    this.currentFilePath = file_name.textContent;
+                }
+                this.updateRemove();
+            }
+        }
     }
     getInternalFolders(folder_children, path) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -661,6 +722,7 @@ class FileManager {
         removeHTML.src = "icons/remove.png";
         removeHTML.classList.add("tool");
         removeHTML.classList.add("remove");
+        removeHTML.addEventListener("click", this.handleRemoveClick.bind(this));
         let grid_wrapperHTML = document.createElement("div");
         grid_wrapperHTML.classList.add("grid_wrapper");
         let tableHTML = document.createElement("img");
