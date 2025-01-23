@@ -8,12 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-export class FileManagerServer {
+class FileManagerServer {
 }
-export class FileManager {
+class FileManager {
     constructor(root, FileManagerServer, rootFolderName = 'Root') {
         this.image_extension = ['png', 'jpg', 'jpeg', 'webp'];
         this.lastFolders = [];
+        this.currentPath = '/';
+        this.currentFilePath = '/';
+        this.toolsState = {
+            remove: false,
+            cut: false,
+            duplicate: false,
+            insert: false,
+            rename: false
+        };
         this.rootFolderName = rootFolderName;
         this.FileManagerServer = FileManagerServer;
         this.arrowsState = {
@@ -24,16 +33,24 @@ export class FileManager {
             throw new SyntaxError("An empty or invalid variable type was passed.");
         }
         this.root = root;
+        // this.root.addEventListener("click", this.handleFilemanagerClick.bind(this));
         this.initInterface();
-        let buffer = this.root.querySelector(".current_path");
-        if (buffer instanceof HTMLElement) {
-            this.currentPathElem = buffer;
+        let bufferChecker = this.root.querySelector(".upload_files_block");
+        if (bufferChecker instanceof HTMLElement) {
+            this.uploadFilesPanel = bufferChecker;
         }
         else {
             throw new Error('The hierarchy of elements was violated');
         }
-        let back_arrow = this.root.querySelector(".arrow_back");
-        let up_arrow = this.root.querySelector(".arrow_up");
+        bufferChecker = this.root.querySelector(".current_path");
+        if (bufferChecker instanceof HTMLElement) {
+            this.currentPathElem = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        const back_arrow = this.root.querySelector(".arrow_back");
+        const up_arrow = this.root.querySelector(".arrow_up");
         if (back_arrow instanceof HTMLElement && up_arrow instanceof HTMLElement) {
             this.arrowsElements = {
                 back_arrow: back_arrow,
@@ -43,12 +60,38 @@ export class FileManager {
         else {
             throw new Error('The hierarchy of elements was violated');
         }
+        const remove_elem = this.root.querySelector(".remove");
+        const cut_elem = this.root.querySelector(".cut");
+        const duplicate_elem = this.root.querySelector(".duplicate");
+        const insert_elem = this.root.querySelector(".insert");
+        const rename_elem = this.root.querySelector(".rename");
+        if (remove_elem instanceof HTMLElement && cut_elem instanceof HTMLElement && duplicate_elem instanceof HTMLElement && insert_elem instanceof HTMLElement && rename_elem instanceof HTMLElement) {
+            this.toolsElements = {
+                remove: remove_elem,
+                cut: cut_elem,
+                duplicate: duplicate_elem,
+                insert: insert_elem,
+                rename: rename_elem
+            };
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
         this.updateBackArrow();
+        bufferChecker = document.querySelector(".folder_root_wrapper");
+        let root_parent = bufferChecker === null || bufferChecker === void 0 ? void 0 : bufferChecker.querySelector(".folder_parent");
+        if (root_parent instanceof HTMLElement) {
+            this.showFileList(root_parent, true);
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
     }
     createHTMLFileList(file) {
         var _a;
         let file_blockHTML = document.createElement("div");
         file_blockHTML.classList.add("file_block");
+        // file_blockHTML.addEventListener("click", this.handleFileClick.bind(this));
         let file_iconHTML = document.createElement("img");
         file_iconHTML.classList.add("file_icon");
         let file_typeHTML = document.createElement("span");
@@ -157,8 +200,10 @@ export class FileManager {
                     if (children.length === 0) {
                         if (folder_name === null || folder_name === void 0 ? void 0 : folder_name.textContent) {
                             let path = this.getPath(folder_wrapper, folder_name === null || folder_name === void 0 ? void 0 : folder_name.textContent);
+                            this.currentPath = path;
                             yield this.getInternalFolders(folder_children, path);
                             this.updateUpArrow(path);
+                            // this.updateRemove();
                             this.updateCurrentPath(path);
                             this.updateBackArrow();
                         }
@@ -250,9 +295,11 @@ export class FileManager {
         let folder_name = folder_parent === null || folder_parent === void 0 ? void 0 : folder_parent.querySelector(".folder_name");
         if (folder_wrapper != null && folder_parent != null && folder_name != null && folder_parent instanceof HTMLElement && folder_name.textContent) {
             let path = this.getPath(folder_wrapper, folder_name.textContent);
+            this.currentPath = path;
             this.focusNavFolder(folder_parent, back);
             this.getInternalFiles(path);
             this.updateUpArrow(path);
+            // this.clearCurrentFile();
             this.updateBackArrow();
             this.updateCurrentPath(path);
         }
@@ -340,6 +387,57 @@ export class FileManager {
             this.showFileList(this.currentFolder, true);
         }
     }
+    handleUploadClick(event) {
+        this.uploadFilesPanel.classList.toggle("hidden");
+    }
+    handleUploadingFile(event) {
+        return __awaiter(this, void 0, void 0, function* () {
+            event.preventDefault();
+            let input_file = document.getElementById('upload_file');
+            if (input_file instanceof HTMLInputElement && input_file.files) {
+                const file = input_file.files[0];
+                if (!file) {
+                    return;
+                }
+                try {
+                    yield this.FileManagerServer.uploadFile(file, this.currentPath);
+                }
+                catch (error) {
+                    throw error;
+                }
+                this.getInternalFiles(this.currentPath);
+                this.updateUpArrow(this.currentPath);
+                // this.updateRemove();
+                this.updateCurrentPath(this.currentPath);
+                this.updateBackArrow();
+                input_file.value = "";
+            }
+        });
+    }
+    handleUploadingFolder(event) {
+        return __awaiter(this, void 0, void 0, function* () {
+            event.preventDefault();
+            let input_folder = document.getElementById('upload_folder');
+            if (input_folder instanceof HTMLInputElement && input_folder.files) {
+                const files = input_folder.files;
+                if (files.length === 0) {
+                    return;
+                }
+                try {
+                    yield this.FileManagerServer.uploadFolder(files, this.currentPath);
+                }
+                catch (error) {
+                    throw error;
+                }
+                this.getInternalFiles(this.currentPath);
+                this.updateUpArrow(this.currentPath);
+                // this.updateRemove();
+                this.updateCurrentPath(this.currentPath);
+                this.updateBackArrow();
+                input_folder.value = "";
+            }
+        });
+    }
     handleOpenFileListFolder(event) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c, _d;
@@ -365,6 +463,7 @@ export class FileManager {
                     }
                     if (newCurrentFolder && newCurrentFolder instanceof HTMLElement && newCurrentFolderWrapper != null && newCurrentFolderWrapper instanceof HTMLElement) {
                         let path = this.getPath(newCurrentFolderWrapper, file_name === null || file_name === void 0 ? void 0 : file_name.textContent);
+                        this.currentPath = path;
                         (_d = this.currentFolder) === null || _d === void 0 ? void 0 : _d.classList.remove("folder_parent__opened");
                         newCurrentFolder.classList.add("folder_parent__opened");
                         if (this.currentFolder) {
@@ -377,6 +476,7 @@ export class FileManager {
                             this.updateUpArrow(path);
                             this.updateCurrentPath(path);
                             this.updateBackArrow();
+                            // this.clearCurrentFile();
                         }
                     }
                     else {
@@ -391,7 +491,13 @@ export class FileManager {
     }
     getInternalFolders(folder_children, path) {
         return __awaiter(this, void 0, void 0, function* () {
-            let folders = yield this.FileManagerServer.getFolders(path);
+            let folders;
+            try {
+                folders = yield this.FileManagerServer.getFolders(path);
+            }
+            catch (error) {
+                throw error;
+            }
             if (folders != null) {
                 folders.forEach(folder => {
                     var _a, _b;
@@ -406,7 +512,13 @@ export class FileManager {
     }
     getInternalFiles(path) {
         return __awaiter(this, void 0, void 0, function* () {
-            let files = yield this.FileManagerServer.getFiles(path);
+            let files;
+            try {
+                files = yield this.FileManagerServer.getFiles(path);
+            }
+            catch (error) {
+                throw error;
+            }
             if (files != null && this.files_listHTML) {
                 this.files_listHTML.innerHTML = "";
                 files.forEach(file => {
@@ -472,16 +584,63 @@ export class FileManager {
         // Creating filemanager_tools
         let filemanager_toolsHTML = document.createElement("div");
         filemanager_toolsHTML.classList.add("filemanager_tools");
+        filemanager_toolsHTML.style.position = "relative";
         let add_file_buttonHTML = document.createElement("button");
         add_file_buttonHTML.type = "button";
         add_file_buttonHTML.classList.add("add_file_button");
+        add_file_buttonHTML.addEventListener("click", this.handleUploadClick.bind(this));
         let add_file_iconHTML = document.createElement("img");
         add_file_iconHTML.src = "icons/sticky-notes.png";
         add_file_iconHTML.classList.add("add_file_icon");
         add_file_buttonHTML.append(add_file_iconHTML);
         let add_file_spanHTML = document.createElement("span");
-        add_file_spanHTML.textContent = "Загрузить";
+        add_file_spanHTML.textContent = "Upload";
         add_file_buttonHTML.append(add_file_spanHTML);
+        let upload_files_blockHTML = document.createElement("div");
+        upload_files_blockHTML.classList.add("upload_files_block");
+        upload_files_blockHTML.classList.add("hidden");
+        let upload_files_wrapperHTML1 = document.createElement("div");
+        upload_files_wrapperHTML1.classList.add("upload_files_func_wrapper");
+        let upload_file_imgHTML = document.createElement("img");
+        upload_file_imgHTML.src = "icons/add_file.png";
+        upload_file_imgHTML.classList.add("upload_files_func_icon");
+        upload_file_imgHTML.classList.add("upload_file");
+        upload_files_wrapperHTML1.append(upload_file_imgHTML);
+        let upload_file_spanHTML = document.createElement("span");
+        upload_file_spanHTML.textContent = "Upload file";
+        upload_file_spanHTML.classList.add("upload_files_func_name");
+        upload_files_wrapperHTML1.append(upload_file_spanHTML);
+        let upload_file_inputHTML = document.createElement("input");
+        upload_file_inputHTML.classList.add("upload_files_func_input");
+        upload_file_inputHTML.type = "file";
+        upload_file_inputHTML.name = "upload_file";
+        upload_file_inputHTML.id = "upload_file";
+        upload_file_inputHTML.addEventListener("change", this.handleUploadingFile.bind(this));
+        upload_files_wrapperHTML1.append(upload_file_inputHTML);
+        let upload_files_wrapperHTML2 = document.createElement("div");
+        upload_files_wrapperHTML2.classList.add("upload_files_func_wrapper");
+        let upload_file_imgHTML2 = document.createElement("img");
+        upload_file_imgHTML2.src = "icons/add_folder.png";
+        upload_file_imgHTML2.classList.add("upload_files_func_icon");
+        upload_file_imgHTML2.classList.add("upload_folder");
+        upload_files_wrapperHTML2.append(upload_file_imgHTML2);
+        let upload_file_spanHTML2 = document.createElement("span");
+        upload_file_spanHTML2.textContent = "Upload folder";
+        upload_file_spanHTML2.classList.add("upload_files_func_name");
+        upload_files_wrapperHTML2.append(upload_file_spanHTML2);
+        let upload_file_inputHTML2 = document.createElement("input");
+        upload_file_inputHTML2.classList.add("upload_files_func_input");
+        upload_file_inputHTML2.type = "file";
+        upload_file_inputHTML2.name = "upload_folder";
+        upload_file_inputHTML2.id = "upload_folder";
+        upload_file_inputHTML2.setAttribute("webkitdirectory", '');
+        upload_file_inputHTML2.setAttribute("directory", '');
+        upload_file_inputHTML2.setAttribute("multiple", '');
+        upload_file_inputHTML2.addEventListener("change", this.handleUploadingFolder.bind(this));
+        upload_files_wrapperHTML2.append(upload_file_inputHTML2);
+        upload_files_blockHTML.append(upload_files_wrapperHTML1);
+        upload_files_blockHTML.append(upload_files_wrapperHTML2);
+        filemanager_toolsHTML.append(upload_files_blockHTML);
         let cutHTML = document.createElement("img");
         cutHTML.src = "icons/cut2.png";
         cutHTML.classList.add("tool");
