@@ -715,12 +715,13 @@ export class FileManager {
                 if (this.duplicateState) {
                     try {
                         if (this.currentPath === "/") {
-                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `/${this.currentFilePath}`);
+                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `${this.selectedFilePath}`);
                         }
                         else {
-                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `${this.currentPath}/${this.currentFilePath}`);
+                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `${this.currentPath}${this.selectedFilePath}`);
                         }
                         if (this.currentFolder instanceof HTMLElement) {
+                            yield this.updateNavFolders();
                             this.updateFileList(this.currentFolder, true);
                         }
                         else {
