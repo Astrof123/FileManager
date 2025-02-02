@@ -8,14 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-class FileManagerServer {
+export class FileManagerServer {
 }
-class FileManager {
+export class FileManager {
     constructor(root, FileManagerServer, rootFolderName = 'Root') {
         this.image_extension = ['png', 'jpg', 'jpeg', 'webp'];
         this.lastFolders = [];
         this.currentPath = '/';
         this.currentFilePath = '/';
+        this.selectedFilePath = '/';
+        this.duplicateState = false;
+        this.cutState = false;
+        this.openFolders = [];
         this.toolsState = {
             remove: false,
             cut: false,
@@ -81,7 +85,7 @@ class FileManager {
         bufferChecker = document.querySelector(".folder_root_wrapper");
         let root_parent = bufferChecker === null || bufferChecker === void 0 ? void 0 : bufferChecker.querySelector(".folder_parent");
         if (root_parent instanceof HTMLElement) {
-            this.showFileList(root_parent, true);
+            this.updateFileList(root_parent, true);
         }
         else {
             throw new Error('The hierarchy of elements was violated');
@@ -150,7 +154,12 @@ class FileManager {
         (_a = this.files_listHTML) === null || _a === void 0 ? void 0 : _a.append(file_blockHTML);
         return file_blockHTML;
     }
-    createHTMLNavFolder(folder, root) {
+    createHTMLNavFolder(folder, root, initial = false) {
+        let root_parent = root.parentElement;
+        let root_parent_path = root_parent === null || root_parent === void 0 ? void 0 : root_parent.getAttribute("path");
+        if (!root_parent_path && !initial) {
+            throw new Error('Element does not have a path attribute');
+        }
         let folder_wrapperHTML = document.createElement("div");
         folder_wrapperHTML.classList.add("folder_wrapper");
         let folder_childrenHTML = document.createElement("div");
@@ -172,10 +181,21 @@ class FileManager {
         folderHTML.append(folder_open_icon_wrapperHTML);
         folderHTML.append(folder_iconHTML);
         folderHTML.append(folder_nameHTML);
+        if (initial) {
+            folder_wrapperHTML.setAttribute("path", "/");
+        }
+        else {
+            if (root_parent_path === "/") {
+                folder_wrapperHTML.setAttribute("path", root_parent_path + folder.name);
+            }
+            else {
+                folder_wrapperHTML.setAttribute("path", root_parent_path + "/" + folder.name);
+            }
+        }
         folder_wrapperHTML.append(folderHTML);
         folder_wrapperHTML.append(folder_childrenHTML);
         root.append(folder_wrapperHTML);
-        return [folder_open_icon_wrapperHTML, folderHTML];
+        return [folder_open_icon_wrapperHTML, folderHTML, folder_wrapperHTML];
     }
     openCloseFolder(folder_parent_1) {
         return __awaiter(this, arguments, void 0, function* (folder_parent, from = "nav") {
@@ -199,14 +219,17 @@ class FileManager {
                     folder_open_icon.src = "icons/arrow-point-to-down.png";
                     if (children.length === 0) {
                         if (folder_name === null || folder_name === void 0 ? void 0 : folder_name.textContent) {
-                            let path = this.getPath(folder_wrapper, folder_name === null || folder_name === void 0 ? void 0 : folder_name.textContent);
-                            this.currentPath = path;
-                            yield this.getInternalFolders(folder_children, path);
-                            this.updateUpArrow(path);
-                            this.updateRemove();
-                            this.updateRename();
-                            this.updateCurrentPath(path);
-                            this.updateBackArrow();
+                            let path = folder_wrapper.getAttribute("path");
+                            if (path) {
+                                this.currentPath = path;
+                                yield this.getInternalFolders(folder_children, path);
+                                this.updateUpArrow(path);
+                                this.updateRemove();
+                                this.updateRename();
+                                this.updateDuplicate();
+                                // this.updateCurrentPath(path);
+                                this.updateBackArrow();
+                            }
                         }
                         else {
                             throw new Error('The hierarchy of elements was violated');
@@ -245,42 +268,8 @@ class FileManager {
             throw new Error('The hierarchy of elements was violated');
         }
     }
-    getPath(wrapper, folderName) {
-        var _a, _b;
-        if (wrapper == null) {
-            throw new Error('The hierarchy of elements was violated');
-        }
-        let buff_div = wrapper;
-        let path;
-        if (folderName != null) {
-            if (buff_div.classList.contains("folder_root_wrapper")) {
-                path = "/";
-            }
-            else {
-                path = "/" + folderName;
-                buff_div = (_a = buff_div.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement;
-                if (buff_div == null) {
-                    throw new Error('The hierarchy of elements was violated');
-                }
-                while (!buff_div.classList.contains("folder_root_wrapper")) {
-                    let buff_span = buff_div.querySelector(".folder_name");
-                    path = `/${buff_span === null || buff_span === void 0 ? void 0 : buff_span.textContent}${path}`;
-                    buff_div = (_b = buff_div.parentElement) === null || _b === void 0 ? void 0 : _b.parentElement;
-                    if (buff_div == null) {
-                        throw new Error('The hierarchy of elements was violated');
-                    }
-                }
-            }
-            return path;
-        }
-        else {
-            throw new Error('The hierarchy of elements was violated');
-        }
-    }
     focusNavFolder(folder_parent, back) {
         var _a;
-        console.log(this.currentFolder);
-        console.log(folder_parent);
         if (folder_parent !== this.currentFolder) {
             if (this.currentFolder) {
                 (_a = this.currentFolder) === null || _a === void 0 ? void 0 : _a.classList.remove("folder_parent__opened");
@@ -292,29 +281,11 @@ class FileManager {
             this.currentFolder = folder_parent;
         }
     }
-    showFileList(targetElement, back = false) {
-        let folder_wrapper = targetElement.closest('.folder_wrapper');
-        let folder_parent = targetElement.closest('.folder_parent');
-        let folder_name = folder_parent === null || folder_parent === void 0 ? void 0 : folder_parent.querySelector(".folder_name");
-        if (folder_wrapper != null && folder_parent != null && folder_name != null && folder_parent instanceof HTMLElement && folder_name.textContent) {
-            let path = this.getPath(folder_wrapper, folder_name.textContent);
-            this.currentPath = path;
-            this.focusNavFolder(folder_parent, back);
-            this.getInternalFiles(path);
-            this.updateUpArrow(path);
-            this.clearCurrentFile();
-            this.updateBackArrow();
-            this.updateCurrentPath(path);
-        }
-        else {
-            throw new Error('The hierarchy of elements was violated');
-        }
-    }
     handleShowFileList(event) {
         event.stopPropagation();
         if (event.target != null && event.target instanceof HTMLElement) {
             let targetElem = event.target;
-            this.showFileList(targetElem);
+            this.updateFileList(targetElem);
         }
         else {
             throw new Error('The hierarchy of elements was violated');
@@ -369,7 +340,7 @@ class FileManager {
         if (this.lastFolders.length > 0) {
             let lastFolder = this.lastFolders.pop();
             if (lastFolder) {
-                this.showFileList(lastFolder, true);
+                this.updateFileList(lastFolder, true);
             }
         }
     }
@@ -380,18 +351,40 @@ class FileManager {
             let folder_wrapper = (_c = (_b = (_a = this.currentFolder) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.parentElement) === null || _c === void 0 ? void 0 : _c.parentElement;
             let folder_parent = folder_wrapper === null || folder_wrapper === void 0 ? void 0 : folder_wrapper.querySelector('.folder_parent');
             if (folder_parent instanceof HTMLElement) {
-                this.showFileList(folder_parent, true);
+                this.updateFileList(folder_parent, true);
             }
         }
     }
     handleRefreshClick(event) {
-        event.stopPropagation();
-        if (this.currentFolder instanceof HTMLElement) {
-            this.showFileList(this.currentFolder, true);
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.currentFolder instanceof HTMLElement) {
+                yield this.updateNavFolders();
+                this.updateFileList(this.currentFolder, true);
+            }
+        });
     }
     handleUploadClick(event) {
         this.uploadFilesPanel.classList.toggle("hidden");
+    }
+    updateFileList(targetElement_1) {
+        return __awaiter(this, arguments, void 0, function* (targetElement, back = false) {
+            let folder_wrapper = targetElement.closest('.folder_wrapper');
+            if (folder_wrapper) {
+                let folder_parent = folder_wrapper === null || folder_wrapper === void 0 ? void 0 : folder_wrapper.querySelector('.folder_parent');
+                if (folder_parent instanceof HTMLElement) {
+                    let path = folder_wrapper.getAttribute("path");
+                    if (path) {
+                        this.currentPath = path;
+                        yield this.getInternalFiles(path);
+                        this.focusNavFolder(folder_parent, back);
+                        this.updateUpArrow(path);
+                        this.clearCurrentFile();
+                        this.updateBackArrow();
+                        this.updateCurrentPath(path);
+                    }
+                }
+            }
+        });
     }
     handleUploadingFile(event) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -412,9 +405,81 @@ class FileManager {
                 this.updateUpArrow(this.currentPath);
                 this.updateRemove();
                 this.updateRename();
+                this.updateDuplicate();
+                this.updateInsert();
                 this.updateCurrentPath(this.currentPath);
                 this.updateBackArrow();
                 input_file.value = "";
+            }
+        });
+    }
+    openPreviousFolders() {
+        for (let i = 0; i < this.openFolders.length; i++) {
+            let check_wrapper = this.root.querySelector(`[path="${this.openFolders[i]}"]`);
+            let open_folder = check_wrapper === null || check_wrapper === void 0 ? void 0 : check_wrapper.querySelector(".folder_parent");
+            if (open_folder instanceof HTMLElement) {
+                this.openCloseFolder(open_folder);
+            }
+        }
+    }
+    searchOpenFoldersStart() {
+        let folder_root_wrapper = this.root.querySelector(".folder_root_wrapper");
+        let folder_children_element = folder_root_wrapper === null || folder_root_wrapper === void 0 ? void 0 : folder_root_wrapper.querySelector(".folder_children");
+        let folder_children = folder_children_element === null || folder_children_element === void 0 ? void 0 : folder_children_element.children;
+        if (folder_children) {
+            for (let i = 0; i < folder_children.length; i++) {
+                this.searchOpenFoldersRecursion(folder_children[i]);
+            }
+        }
+    }
+    searchOpenFoldersRecursion(folder_wrapper) {
+        let folder_children_element = folder_wrapper === null || folder_wrapper === void 0 ? void 0 : folder_wrapper.querySelector(".folder_children");
+        let folder_children = folder_children_element === null || folder_children_element === void 0 ? void 0 : folder_children_element.children;
+        let folder_parent = folder_wrapper === null || folder_wrapper === void 0 ? void 0 : folder_wrapper.querySelector(".folder_parent");
+        if (folder_parent && folder_parent.classList.contains("opened") && folder_wrapper instanceof HTMLElement) {
+            let path = folder_wrapper.getAttribute("path");
+            if (path) {
+                this.openFolders.push(path);
+            }
+        }
+        if (folder_children) {
+            for (let i = 0; i < folder_children.length; i++) {
+                this.searchOpenFoldersRecursion(folder_children[i]);
+            }
+        }
+    }
+    updateNavFolders() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let folder_root_wrapper = this.root.querySelector(".folder_root_wrapper");
+            let folder_root_parent = folder_root_wrapper === null || folder_root_wrapper === void 0 ? void 0 : folder_root_wrapper.querySelector(".folder_parent");
+            let folder_root_childen_element = folder_root_wrapper === null || folder_root_wrapper === void 0 ? void 0 : folder_root_wrapper.querySelector(".folder_children");
+            let folder_open_icon = folder_root_parent === null || folder_root_parent === void 0 ? void 0 : folder_root_parent.querySelector('.folder_open_icon');
+            if (folder_root_parent instanceof HTMLElement && folder_root_childen_element && folder_open_icon instanceof HTMLImageElement) {
+                let buffer_currentPath = this.currentPath;
+                this.searchOpenFoldersStart();
+                folder_root_childen_element.innerHTML = "";
+                if (folder_root_parent === null || folder_root_parent === void 0 ? void 0 : folder_root_parent.classList.contains('opened')) {
+                    folder_root_parent.classList.remove('opened');
+                    folder_open_icon.src = "icons/arrow-point-to-right.png";
+                }
+                else if (!(folder_root_parent === null || folder_root_parent === void 0 ? void 0 : folder_root_parent.classList.contains('opened'))) {
+                    folder_root_parent === null || folder_root_parent === void 0 ? void 0 : folder_root_parent.classList.add('opened');
+                    folder_open_icon.src = "icons/arrow-point-to-down.png";
+                }
+                yield this.openCloseFolder(folder_root_parent, 'nav');
+                this.openPreviousFolders();
+                this.currentPath = buffer_currentPath;
+                let bufferCurrentFolder = this.root.querySelector(`[path="${this.currentPath}"]`);
+                if (bufferCurrentFolder instanceof HTMLElement) {
+                    this.currentFolder = bufferCurrentFolder;
+                }
+                else {
+                    this.currentPath = "/";
+                    let bufferCurrentFolder = this.root.querySelector(`[path="${this.currentPath}"]`);
+                    if (bufferCurrentFolder instanceof HTMLElement) {
+                        this.currentFolder = bufferCurrentFolder;
+                    }
+                }
             }
         });
     }
@@ -433,13 +498,11 @@ class FileManager {
                 catch (error) {
                     throw error;
                 }
-                this.getInternalFiles(this.currentPath);
-                this.updateUpArrow(this.currentPath);
-                this.updateRemove();
-                this.updateRename();
-                this.updateCurrentPath(this.currentPath);
-                this.updateBackArrow();
                 input_folder.value = "";
+                yield this.updateNavFolders();
+                if (this.currentFolder instanceof HTMLElement) {
+                    this.updateFileList(this.currentFolder);
+                }
             }
         });
     }
@@ -467,21 +530,23 @@ class FileManager {
                         }
                     }
                     if (newCurrentFolder && newCurrentFolder instanceof HTMLElement && newCurrentFolderWrapper != null && newCurrentFolderWrapper instanceof HTMLElement) {
-                        let path = this.getPath(newCurrentFolderWrapper, file_name === null || file_name === void 0 ? void 0 : file_name.textContent);
-                        this.currentPath = path;
-                        (_d = this.currentFolder) === null || _d === void 0 ? void 0 : _d.classList.remove("folder_parent__opened");
-                        newCurrentFolder.classList.add("folder_parent__opened");
-                        if (this.currentFolder) {
-                            this.lastFolders.push(this.currentFolder);
-                        }
-                        this.currentFolder = newCurrentFolder;
-                        if (this.files_listHTML != null) {
-                            this.files_listHTML.innerHTML = "";
-                            this.getInternalFiles(path);
-                            this.updateUpArrow(path);
-                            this.updateCurrentPath(path);
-                            this.updateBackArrow();
-                            this.clearCurrentFile();
+                        let path = newCurrentFolderWrapper.getAttribute("path");
+                        if (path) {
+                            this.currentPath = path;
+                            (_d = this.currentFolder) === null || _d === void 0 ? void 0 : _d.classList.remove("folder_parent__opened");
+                            newCurrentFolder.classList.add("folder_parent__opened");
+                            if (this.currentFolder) {
+                                this.lastFolders.push(this.currentFolder);
+                            }
+                            this.currentFolder = newCurrentFolder;
+                            if (this.files_listHTML != null) {
+                                this.files_listHTML.innerHTML = "";
+                                this.getInternalFiles(path);
+                                this.updateUpArrow(path);
+                                this.updateCurrentPath(path);
+                                this.updateBackArrow();
+                                this.clearCurrentFile();
+                            }
                         }
                     }
                     else {
@@ -518,6 +583,31 @@ class FileManager {
             this.toolsElements.rename.style.pointerEvents = 'none';
         }
     }
+    updateDuplicate() {
+        if (this.currentFile !== null && this.currentFilePath !== "/") {
+            this.toolsState.duplicate = true;
+            this.toolsElements.duplicate.classList.remove("disabled");
+            this.toolsElements.duplicate.style.pointerEvents = 'auto';
+        }
+        else {
+            this.toolsState.duplicate = false;
+            this.toolsElements.duplicate.classList.add("disabled");
+            this.toolsElements.duplicate.style.pointerEvents = 'none';
+        }
+        this.updateInsert();
+    }
+    updateInsert() {
+        if (this.selectedFilePath !== '/') {
+            this.toolsState.insert = true;
+            this.toolsElements.insert.classList.remove("disabled");
+            this.toolsElements.insert.style.pointerEvents = 'auto';
+        }
+        else {
+            this.toolsState.insert = false;
+            this.toolsElements.insert.classList.add("disabled");
+            this.toolsElements.insert.style.pointerEvents = 'none';
+        }
+    }
     clearCurrentFile() {
         if (this.currentFile) {
             this.currentFile.classList.remove("openedFile");
@@ -526,6 +616,7 @@ class FileManager {
         this.currentFilePath = '/';
         this.updateRemove();
         this.updateRename();
+        this.updateDuplicate();
     }
     handleFilemanagerClick(event) {
         if (event.target instanceof HTMLElement && !event.target.closest(".file_block")) {
@@ -535,11 +626,14 @@ class FileManager {
     handleRemoveClick(event) {
         return __awaiter(this, void 0, void 0, function* () {
             event.stopPropagation();
-            if (this.currentFilePath !== "/") {
+            let result = window.confirm("Are you sure you want to delete?");
+            if (this.currentFilePath !== "/" && result) {
                 try {
                     yield this.FileManagerServer.removeFileOrFolder(this.currentPath + "/" + this.currentFilePath);
                     if (this.currentFolder instanceof HTMLElement) {
-                        this.showFileList(this.currentFolder, true);
+                        console.log(this.currentFolder);
+                        yield this.updateNavFolders();
+                        this.updateFileList(this.currentFolder, true);
                     }
                     else {
                         throw new Error('The hierarchy of elements was violated');
@@ -573,10 +667,18 @@ class FileManager {
                             newTextElement.classList.add("file_metadata");
                             if (bufferThis.currentFile instanceof HTMLElement) {
                                 bufferThis.currentFile.replaceChild(newTextElement, inputElement);
+                                if (originalTextElem.textContent === inputElement.value) {
+                                    return;
+                                }
                                 try {
-                                    yield bufferThis.FileManagerServer.renameFileOrFolder(bufferThis.currentPath + "/" + bufferThis.currentFilePath, bufferThis.currentPath + "/" + newTextElement.textContent);
+                                    if (bufferThis.currentPath === "/") {
+                                        yield bufferThis.FileManagerServer.renameFileOrFolder(`/${bufferThis.currentFilePath}`, `/${newTextElement.textContent}`);
+                                    }
+                                    else {
+                                        yield bufferThis.FileManagerServer.renameFileOrFolder(`${bufferThis.currentPath}/${bufferThis.currentFilePath}`, `${bufferThis.currentPath}/${newTextElement.textContent}`);
+                                    }
                                     if (bufferThis.currentFolder instanceof HTMLElement) {
-                                        bufferThis.showFileList(bufferThis.currentFolder, true);
+                                        bufferThis.updateFileList(bufferThis.currentFolder, true);
                                     }
                                     else {
                                         throw new Error('The hierarchy of elements was violated');
@@ -588,6 +690,48 @@ class FileManager {
                             }
                         });
                     });
+                }
+            }
+        });
+    }
+    handleDuplicateClick(event) {
+        event.stopPropagation();
+        if (this.currentFilePath !== '/') {
+            if (this.currentPath === "/") {
+                this.selectedFilePath = `/${this.currentFilePath}`;
+            }
+            else {
+                this.selectedFilePath = `${this.currentPath}/${this.currentFilePath}`;
+            }
+            this.duplicateState = true;
+            this.cutState = false;
+            this.updateInsert();
+        }
+    }
+    handleInsertClick(event) {
+        return __awaiter(this, void 0, void 0, function* () {
+            event.stopPropagation();
+            if (this.selectedFilePath !== "/") {
+                if (this.duplicateState) {
+                    try {
+                        if (this.currentPath === "/") {
+                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `/${this.currentFilePath}`);
+                        }
+                        else {
+                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `${this.currentPath}/${this.currentFilePath}`);
+                        }
+                        if (this.currentFolder instanceof HTMLElement) {
+                            this.updateFileList(this.currentFolder, true);
+                        }
+                        else {
+                            throw new Error('The hierarchy of elements was violated');
+                        }
+                    }
+                    catch (error) {
+                        throw error;
+                    }
+                }
+                else if (this.cutState) {
                 }
             }
         });
@@ -607,6 +751,7 @@ class FileManager {
                 }
                 this.updateRemove();
                 this.updateRename();
+                this.updateDuplicate();
             }
         }
     }
@@ -770,10 +915,12 @@ class FileManager {
         duplicateHTML.src = "icons/duplicate.png";
         duplicateHTML.classList.add("tool");
         duplicateHTML.classList.add("duplicate");
+        duplicateHTML.addEventListener('click', this.handleDuplicateClick.bind(this));
         let insertHTML = document.createElement("img");
         insertHTML.src = "icons/insert.png";
         insertHTML.classList.add("tool");
         insertHTML.classList.add("insert");
+        insertHTML.addEventListener('click', this.handleInsertClick.bind(this));
         let renameHTML = document.createElement("img");
         renameHTML.src = "icons/rename.png";
         renameHTML.classList.add("tool");
@@ -807,11 +954,11 @@ class FileManager {
         // Creating folders_nav
         let folders_navHTML = document.createElement("div");
         folders_navHTML.classList.add("folders_nav");
-        let rootfolder = this.createHTMLNavFolder({ name: this.rootFolderName }, folders_navHTML);
+        let rootfolder = this.createHTMLNavFolder({ name: this.rootFolderName }, folders_navHTML, true);
         if (rootfolder) {
             let rootfolder_icon_wrapper = rootfolder[0];
             let rootfolder_parent = rootfolder[1];
-            let rootfolder_wrapper = rootfolder_parent.closest(".folder_wrapper");
+            let rootfolder_wrapper = rootfolder[2];
             if (rootfolder_wrapper) {
                 rootfolder_wrapper.classList.add("folder_root_wrapper");
             }
