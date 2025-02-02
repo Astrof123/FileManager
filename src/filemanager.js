@@ -227,7 +227,7 @@ export class FileManager {
                                 this.updateRemove();
                                 this.updateRename();
                                 this.updateDuplicate();
-                                // this.updateCurrentPath(path);
+                                this.updateCut();
                                 this.updateBackArrow();
                             }
                         }
@@ -253,20 +253,22 @@ export class FileManager {
         });
     }
     handleOpenNavFolder(event) {
-        event.stopPropagation();
-        if (event.target != null && event.target instanceof HTMLElement) {
-            let targetElem = event.target;
-            let folder_parent = targetElem.closest('.folder_parent');
-            if (folder_parent != null && folder_parent instanceof HTMLElement) {
-                this.openCloseFolder(folder_parent, 'nav');
+        return __awaiter(this, void 0, void 0, function* () {
+            event.stopPropagation();
+            if (event.target != null && event.target instanceof HTMLElement) {
+                let targetElem = event.target;
+                let folder_parent = targetElem.closest('.folder_parent');
+                if (folder_parent != null && folder_parent instanceof HTMLElement) {
+                    yield this.openCloseFolder(folder_parent, 'nav');
+                }
+                else {
+                    throw new Error('The hierarchy of elements was violated');
+                }
             }
             else {
                 throw new Error('The hierarchy of elements was violated');
             }
-        }
-        else {
-            throw new Error('The hierarchy of elements was violated');
-        }
+        });
     }
     focusNavFolder(folder_parent, back) {
         var _a;
@@ -360,6 +362,10 @@ export class FileManager {
             if (this.currentFolder instanceof HTMLElement) {
                 yield this.updateNavFolders();
                 this.updateFileList(this.currentFolder, true);
+                this.selectedFilePath = "/";
+                this.toolsState.cut = false;
+                this.toolsState.duplicate = false;
+                this.updateInsert();
             }
         });
     }
@@ -406,6 +412,7 @@ export class FileManager {
                 this.updateRemove();
                 this.updateRename();
                 this.updateDuplicate();
+                this.updateCut();
                 this.updateInsert();
                 this.updateCurrentPath(this.currentPath);
                 this.updateBackArrow();
@@ -414,13 +421,16 @@ export class FileManager {
         });
     }
     openPreviousFolders() {
-        for (let i = 0; i < this.openFolders.length; i++) {
-            let check_wrapper = this.root.querySelector(`[path="${this.openFolders[i]}"]`);
-            let open_folder = check_wrapper === null || check_wrapper === void 0 ? void 0 : check_wrapper.querySelector(".folder_parent");
-            if (open_folder instanceof HTMLElement) {
-                this.openCloseFolder(open_folder);
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let i = 0; i < this.openFolders.length; i++) {
+                let check_wrapper = this.root.querySelector(`[path="${this.openFolders[i]}"]`);
+                let open_folder = check_wrapper === null || check_wrapper === void 0 ? void 0 : check_wrapper.querySelector(".folder_parent");
+                if (open_folder instanceof HTMLElement) {
+                    yield this.openCloseFolder(open_folder);
+                }
             }
-        }
+            this.openFolders = [];
+        });
     }
     searchOpenFoldersStart() {
         let folder_root_wrapper = this.root.querySelector(".folder_root_wrapper");
@@ -467,7 +477,7 @@ export class FileManager {
                     folder_open_icon.src = "icons/arrow-point-to-down.png";
                 }
                 yield this.openCloseFolder(folder_root_parent, 'nav');
-                this.openPreviousFolders();
+                yield this.openPreviousFolders();
                 this.currentPath = buffer_currentPath;
                 let bufferCurrentFolder = this.root.querySelector(`[path="${this.currentPath}"]`);
                 if (bufferCurrentFolder instanceof HTMLElement) {
@@ -596,6 +606,19 @@ export class FileManager {
         }
         this.updateInsert();
     }
+    updateCut() {
+        if (this.currentFile !== null && this.currentFilePath !== "/") {
+            this.toolsState.cut = true;
+            this.toolsElements.cut.classList.remove("disabled");
+            this.toolsElements.cut.style.pointerEvents = 'auto';
+        }
+        else {
+            this.toolsState.cut = false;
+            this.toolsElements.cut.classList.add("disabled");
+            this.toolsElements.cut.style.pointerEvents = 'none';
+        }
+        this.updateInsert();
+    }
     updateInsert() {
         if (this.selectedFilePath !== '/') {
             this.toolsState.insert = true;
@@ -617,6 +640,7 @@ export class FileManager {
         this.updateRemove();
         this.updateRename();
         this.updateDuplicate();
+        this.updateCut();
     }
     handleFilemanagerClick(event) {
         if (event.target instanceof HTMLElement && !event.target.closest(".file_block")) {
@@ -631,7 +655,6 @@ export class FileManager {
                 try {
                     yield this.FileManagerServer.removeFileOrFolder(this.currentPath + "/" + this.currentFilePath);
                     if (this.currentFolder instanceof HTMLElement) {
-                        console.log(this.currentFolder);
                         yield this.updateNavFolders();
                         this.updateFileList(this.currentFolder, true);
                     }
@@ -703,8 +726,22 @@ export class FileManager {
             else {
                 this.selectedFilePath = `${this.currentPath}/${this.currentFilePath}`;
             }
-            this.duplicateState = true;
             this.cutState = false;
+            this.duplicateState = true;
+            this.updateInsert();
+        }
+    }
+    handleCutClick(event) {
+        event.stopPropagation();
+        if (this.currentFilePath !== '/') {
+            if (this.currentPath === "/") {
+                this.selectedFilePath = `/${this.currentFilePath}`;
+            }
+            else {
+                this.selectedFilePath = `${this.currentPath}/${this.currentFilePath}`;
+            }
+            this.duplicateState = false;
+            this.cutState = true;
             this.updateInsert();
         }
     }
@@ -714,11 +751,13 @@ export class FileManager {
             if (this.selectedFilePath !== "/") {
                 if (this.duplicateState) {
                     try {
+                        let insert_element_paths = this.selectedFilePath.split('/');
+                        let insert_element_name = insert_element_paths[insert_element_paths.length - 1];
                         if (this.currentPath === "/") {
-                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `${this.selectedFilePath}`);
+                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `/${insert_element_name}`);
                         }
                         else {
-                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `${this.currentPath}${this.selectedFilePath}`);
+                            yield this.FileManagerServer.duplicateFileOrFolder(`${this.selectedFilePath}`, `${this.currentPath}/${insert_element_name}`);
                         }
                         if (this.currentFolder instanceof HTMLElement) {
                             yield this.updateNavFolders();
@@ -733,6 +772,36 @@ export class FileManager {
                     }
                 }
                 else if (this.cutState) {
+                    try {
+                        let insert_element_paths = this.selectedFilePath.split('/');
+                        let insert_element_name = insert_element_paths[insert_element_paths.length - 1];
+                        if (this.currentPath.includes(this.selectedFilePath)) {
+                            return;
+                        }
+                        if (this.currentPath === "/" && this.selectedFilePath === `/${insert_element_name}`) {
+                            return;
+                        }
+                        if (this.selectedFilePath === `${this.currentPath}/${insert_element_name}`) {
+                            return;
+                        }
+                        if (this.currentPath === "/") {
+                            yield this.FileManagerServer.cutFileOrFolder(`${this.selectedFilePath}`, `/${insert_element_name}`);
+                        }
+                        else {
+                            yield this.FileManagerServer.cutFileOrFolder(`${this.selectedFilePath}`, `${this.currentPath}/${insert_element_name}`);
+                        }
+                        yield this.FileManagerServer.removeFileOrFolder(`${this.selectedFilePath}`);
+                        if (this.currentFolder instanceof HTMLElement) {
+                            yield this.updateNavFolders();
+                            this.updateFileList(this.currentFolder, true);
+                        }
+                        else {
+                            throw new Error('The hierarchy of elements was violated');
+                        }
+                    }
+                    catch (error) {
+                        throw error;
+                    }
                 }
             }
         });
@@ -753,6 +822,7 @@ export class FileManager {
                 this.updateRemove();
                 this.updateRename();
                 this.updateDuplicate();
+                this.updateCut();
             }
         }
     }
@@ -912,6 +982,7 @@ export class FileManager {
         cutHTML.src = "icons/cut2.png";
         cutHTML.classList.add("tool");
         cutHTML.classList.add("cut");
+        cutHTML.addEventListener("click", this.handleCutClick.bind(this));
         let duplicateHTML = document.createElement("img");
         duplicateHTML.src = "icons/duplicate.png";
         duplicateHTML.classList.add("tool");
