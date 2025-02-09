@@ -8,16 +8,410 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+
+"use strict";
 class FileManagerStyles {
     constructor() {
+        this.updatableElements = {};
         this.fileManagerMutableStyles = {
             "colors": {
                 hover: "#3e3e3e",
                 border: "#2B2B2B",
                 main_background: "#252526",
-                selected: "#4a4a4a"
+                selected: "#4a4a4a",
+                text_color: "#ffffff"
             },
         };
+        this.fileManagerHeaderStyles = {};
+        this.fileManagerStyles = {};
+        this.setDefaultMutableStyles();
+        if (localStorage.fmMutableStyles) {
+            this.updateMutableStyles();
+        }
+        else {
+            let defaultStyles = this.getDefaultMutableStyles();
+            this.setMutableStyles(defaultStyles);
+            this.updateMutableStyles();
+        }
+        this.updateFileManagerStyles();
+        this.updateFileManagerHeaderStyles();
+        this.headerStyleElement = document.createElement('style');
+        document.head.appendChild(this.headerStyleElement);
+    }
+    updateFileManagerStyles() {
+        this.fileManagerStyles = {
+            "fm_super_root": {
+                "box-sizing": 'border-box',
+                fontFamily: '"Roboto", sans-serif',
+                width: '800px',
+                height: "600px",
+                display: "flex",
+                "flex-direction": "column",
+            },
+            "fm_folders_nav": {
+                width: '220px',
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                "border-radius": '4px',
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                color: '#e3e3e3',
+                overflowX: 'scroll',
+                height: '100%',
+                scrollbarWidth: 'thin',
+                scrollbarColor: `#888 ${this.fileManagerMutableStyles.colors.border}`,
+            },
+            "fm_folder_icon": {
+                width: '22px',
+                marginRight: '8px',
+            },
+            "fm_folder_name": {
+                fontSize: '14px',
+                color: this.fileManagerMutableStyles.colors.text_color,
+            },
+            "fm_folder": {
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                marginLeft: '24px',
+            },
+            "fm_folder_parent": {
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                width: '100%',
+            },
+            "fm_folder_open_icon_wrapper": {
+                paddingLeft: '4px',
+                paddingRight: '8px',
+            },
+            "fm_folder_parent__opened": {
+                "background-color": this.fileManagerMutableStyles.colors.selected,
+            },
+            "fm_openedFile": {
+                "background-color": this.fileManagerMutableStyles.colors.selected,
+            },
+            "fm_folder_open_icon": {
+                width: '10px',
+            },
+            "fm_folder_wrapper": {
+                position: 'relative',
+                left: '24px',
+                userSelect: 'none',
+            },
+            "fm_folder_root_wrapper": {
+                position: 'static',
+            },
+            "fm_files_panel": {
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                color: '#e3e3e3',
+                width: '80%',
+                "border-radius": '4px',
+                overflowY: 'auto',
+                height: '100%',
+            },
+            "fm_filemanager_main": {
+                display: 'flex',
+                flexDirection: 'row',
+                gap: '8px',
+                padding: '16px',
+                paddingTop: '8px',
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                "border-radius": '0px 0px 4px 4px',
+                height: "85%",
+                "box-sizing": "border-box"
+            },
+            "fm_metadata_block": {
+                display: 'flex',
+                flexDirection: 'row',
+                borderBottom: `2px solid ${this.fileManagerMutableStyles.colors.border}`,
+                padding: '8px',
+                fontSize: '12px',
+                paddingLeft: '12px',
+            },
+            "fm_metadata": {
+                userSelect: 'none',
+            },
+            "fm_metadata_name": {
+                width: '40%',
+            },
+            "fm_metadata_changedate": {
+                width: '32%',
+            },
+            "fm_file_changedate": {
+                width: '32%',
+            },
+            "fm_metadata_type": {
+                width: '14%',
+            },
+            "fm_metadata_size": {
+                width: '14%',
+            },
+            "fm_file_type": {
+                width: '14%',
+            },
+            "fm_file_size": {
+                width: '14%',
+            },
+            "fm_files_list": {
+                padding: '8px 0px',
+            },
+            "fm_file_metadata": {
+                overflow: 'hidden',
+                userSelect: 'none',
+                color: this.fileManagerMutableStyles.colors.text_color,
+            },
+            "fm_file_block": {
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                borderBottom: `2px solid ${this.fileManagerMutableStyles.colors.border}`,
+                padding: '8px 0px',
+                paddingLeft: '12px',
+                cursor: 'pointer',
+            },
+            "fm_file_icon": {
+                width: '22px',
+                marginRight: '2%',
+                userSelect: 'none',
+            },
+            "fm_file_name": {
+                width: '31%',
+                marginRight: '2%',
+                overflow: 'hidden',
+                "box-sizing": "border-box",
+            },
+            "fm_filemanager_tools": {
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                borderTop: 'none',
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                padding: '0px 16px',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                height: '50px',
+                "box-sizing": 'border-box',
+            },
+            "fm_filemanager_navigation": {
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                "border-radius": '4px 4px 0px 0px',
+                padding: '8px 16px',
+                display: 'flex',
+                flexDirection: 'row',
+            },
+            "fm_filemanager_arrow": {
+                width: '16px',
+                display: 'block',
+                userSelect: 'none',
+            },
+            "fm_arrows_block": {
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                display: 'flex',
+                "border-radius": '4px',
+            },
+            "fm_arrow_wrapper": {
+                padding: '8px 12px',
+                "border-radius": '4px',
+                cursor: 'pointer',
+            },
+            "fm_add_file_button": {
+                color: this.fileManagerMutableStyles.colors.text_color,
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                borderTop: 'none',
+                borderBottom: 'none',
+                padding: '8px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: '500',
+                height: '100%',
+                "user-select": "none"
+            },
+            "fm_add_file_icon": {
+                width: '24px',
+            },
+            "fm_tool": {
+                width: '35px',
+                height: '35px',
+                padding: '8px',
+                margin: '0px 8px',
+                cursor: 'pointer',
+                display: 'block',
+                userSelect: 'none',
+                "box-sizing": 'border-box'
+            },
+            "fm_current_path": {
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                "border-radius": '4px',
+                width: '60%',
+                marginLeft: '16px',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '0px 12px',
+                marginRight: '8px',
+            },
+            "fm_path_arrow": {
+                width: '12px',
+            },
+            "fm_path_folder": {
+                color: this.fileManagerMutableStyles.colors.text_color,
+                userSelect: 'none',
+            },
+            "fm_search": {
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                "border-radius": '4px',
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                padding: '0px 8px',
+                color: '#ffff',
+                width: '20%',
+            },
+            "fm_grid_wrapper": {
+                display: 'flex',
+                width: '100%',
+                justifyContent: 'flex-end',
+            },
+            "fm_disabled": {
+                opacity: '0.5',
+            },
+            "fm_upload_files_block": {
+                display: 'flex',
+                flexDirection: 'column',
+                "background-color": this.fileManagerMutableStyles.colors.hover,
+                width: '143px',
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                borderTop: 'none',
+                position: 'absolute',
+                bottom: '-84px',
+                zIndex: '10',
+                cursor: 'pointer',
+                "box-sizing": 'border-box',
+            },
+            "fm_upload_files_func_wrapper": {
+                display: 'flex',
+                flexDirection: 'row',
+                padding: '8px',
+                gap: '8px',
+                alignItems: 'center',
+                width: '100%',
+                userSelect: 'none',
+                "box-sizing": 'border-box',
+                position: 'relative',
+            },
+            "fm_upload_files_func_icon": {
+                width: '24px',
+            },
+            "fm_upload_files_func_name": {
+                color: this.fileManagerMutableStyles.colors.text_color,
+                fontSize: '13px',
+                fontWeight: '500',
+            },
+            "fm_hidden": {
+                display: 'none',
+            },
+            "fm_upload_files_func_input": {
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                top: '0px',
+                left: '0px',
+                opacity: '0',
+            },
+            "fm_upload_file_func_input": {
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                top: '0px',
+                left: '0px',
+                opacity: '0',
+            },
+            "fm_tool_active": {
+                opacity: '0.6',
+            },
+            "fm_settings_panel": {
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                width: "100%",
+                height: "100%",
+                padding: "4%",
+                "box-sizing": "border-box",
+                "border-radius": "4px"
+            },
+            "fm_leave_settings_arrow": {},
+            "fm_params_panel": {
+                display: "flex",
+                "flex-direction": "row",
+                padding: "16px 8px",
+                "flex-wrap": "wrap",
+                gap: "12px",
+            },
+            "fm_color_label": {
+                color: this.fileManagerMutableStyles.colors.text_color,
+                display: "flex",
+                gap: "8px",
+                "flex-direction": "column",
+                padding: "16px",
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                "border-radius": '8px',
+            },
+            "fm_color_input": {
+                width: "40px",
+                height: "40px",
+                "box-shadow": "0px 4px 8px 0px rgba(171, 171, 171, 0.2)",
+                padding: "0px",
+                margin: "0px",
+                border: "none",
+                cursor: "pointer",
+                "border-radius": "4px",
+            },
+            "fm_title_block": {
+                color: this.fileManagerMutableStyles.colors.text_color,
+                "font-size": "20px",
+                "font-weight": "600",
+                display: "flex",
+                "flex-direction": "column-reverse",
+                gap: "16px",
+                "margin-left": "12px",
+            },
+            "fm_buttons_panel": {
+                display: "flex",
+                "justify-content": "flex-end",
+                gap: "16px",
+                "align-items": "center"
+            },
+            "fm_submit_settings_button": {
+                padding: "12px",
+                "background-color": "#a7d649",
+                border: "none",
+                "border-radius": "8px",
+                "font-weight": "600",
+                "cursor": "pointer"
+            },
+            "fm_settings_form": {
+                height: "85%",
+                display: "flex",
+                "flex-direction": "column",
+                "justify-content": "space-between",
+                "box-sizing": "border-box",
+            },
+            "fm_reset_settings_button": {
+                padding: "12px",
+                "background-color": "#a9b09b",
+                border: "none",
+                "border-radius": "8px",
+                "font-weight": "600",
+                "cursor": "pointer"
+            },
+            "fm_message_submit": {
+                color: "#a7d649"
+            },
+        };
+    }
+    updateFileManagerHeaderStyles() {
         this.fileManagerHeaderStyles = {
             "fm_folder_parent:hover": {
                 "background-color": this.fileManagerMutableStyles.colors.hover,
@@ -64,297 +458,15 @@ class FileManagerStyles {
                 "background-color": this.fileManagerMutableStyles.colors.hover,
             },
             "fm_upload_files_func_wrapper:hover": {
-                "background-color": '#494949',
-            }
-        };
-        this.fileManagerStyles = {
-            "fm_super_root": {
-                boxSizing: 'border-box',
-                fontFamily: '"Roboto", sans-serif',
-                width: '800px',
-            },
-            "fm_folders_nav": {
-                width: '220px',
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                "border-radius": '4px',
-                "background-color": this.fileManagerMutableStyles.colors.main_background,
-                color: '#e3e3e3',
-                overflowX: 'scroll',
-                height: '500px',
-                scrollbarWidth: 'thin',
-                scrollbarColor: `#888 ${this.fileManagerMutableStyles.colors.border}`,
-            },
-            "fm_folder_icon": {
-                width: '22px',
-                marginRight: '8px',
-            },
-            "fm_folder_name": {
-                fontSize: '14px',
-            },
-            "fm_folder": {
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                marginLeft: '24px',
-            },
-            "fm_folder_parent": {
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                width: '100%',
-            },
-            "fm_folder_open_icon_wrapper": {
-                paddingLeft: '4px',
-                paddingRight: '8px',
-            },
-            "fm_folder_parent__opened": {
                 "background-color": this.fileManagerMutableStyles.colors.selected,
             },
-            "fm_openedFile": {
-                "background-color": this.fileManagerMutableStyles.colors.selected,
+            "fm_submit_settings_button:hover": {
+                "background-color": "#94be41",
             },
-            "fm_folder_open_icon": {
-                width: '10px',
-            },
-            "fm_folder_wrapper": {
-                position: 'relative',
-                left: '24px',
-                userSelect: 'none',
-            },
-            "fm_folder_root_wrapper": {
-                position: 'static',
-            },
-            "fm_files_panel": {
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                "background-color": this.fileManagerMutableStyles.colors.main_background,
-                color: '#e3e3e3',
-                width: '80%',
-                "border-radius": '4px',
-                overflowY: 'auto',
-                height: '500px',
-            },
-            "fm_filemanager_main": {
-                display: 'flex',
-                flexDirection: 'row',
-                gap: '8px',
-                padding: '16px',
-                paddingTop: '8px',
-                "background-color": this.fileManagerMutableStyles.colors.main_background,
-                "border-radius": '0px 0px 4px 4px',
-            },
-            "fm_metadata_block": {
-                display: 'flex',
-                flexDirection: 'row',
-                borderBottom: `2px solid ${this.fileManagerMutableStyles.colors.border}`,
-                padding: '8px',
-                fontSize: '12px',
-                paddingLeft: '12px',
-            },
-            "fm_metadata": {
-                userSelect: 'none',
-            },
-            "fm_metadata_name": {
-                width: '40%',
-            },
-            "fm_metadata_changedate": {
-                width: '32%',
-            },
-            "fm_file_changedate": {
-                width: '32%',
-            },
-            "fm_metadata_type": {
-                width: '14%',
-            },
-            "fm_metadata_size": {
-                width: '14%',
-            },
-            "fm_file_type": {
-                width: '14%',
-            },
-            "fm_file_size": {
-                width: '14%',
-            },
-            "fm_files_list": {
-                padding: '8px 0px',
-            },
-            "fm_file_metadata": {
-                overflow: 'hidden',
-                userSelect: 'none',
-            },
-            "fm_file_block": {
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                borderBottom: `2px solid ${this.fileManagerMutableStyles.colors.border}`,
-                padding: '8px 0px',
-                paddingLeft: '12px',
-                cursor: 'pointer',
-            },
-            "fm_file_icon": {
-                width: '22px',
-                marginRight: '2%',
-                userSelect: 'none',
-            },
-            "fm_file_name": {
-                width: '31%',
-                marginRight: '2%',
-                overflow: 'hidden',
-            },
-            "fm_filemanager_tools": {
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                borderTop: 'none',
-                "background-color": this.fileManagerMutableStyles.colors.main_background,
-                padding: '0px 16px',
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                height: '50px',
-                boxSizing: 'border-box',
-            },
-            "fm_filemanager_navigation": {
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                "background-color": this.fileManagerMutableStyles.colors.main_background,
-                "border-radius": '4px 4px 0px 0px',
-                padding: '8px 16px',
-                display: 'flex',
-                flexDirection: 'row',
-            },
-            "fm_filemanager_arrow": {
-                width: '16px',
-                display: 'block',
-                userSelect: 'none',
-            },
-            "fm_arrows_block": {
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                display: 'flex',
-                "border-radius": '4px',
-            },
-            "fm_arrow_wrapper": {
-                padding: '8px 12px',
-                "border-radius": '4px',
-                cursor: 'pointer',
-            },
-            "fm_add_file_button": {
-                color: '#ffff',
-                "background-color": this.fileManagerMutableStyles.colors.main_background,
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                borderTop: 'none',
-                borderBottom: 'none',
-                padding: '8px 12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: '500',
-                height: '100%',
-            },
-            "fm_add_file_icon": {
-                width: '24px',
-            },
-            "fm_tool": {
-                width: '35px',
-                height: '35px',
-                padding: '8px',
-                margin: '0px 8px',
-                cursor: 'pointer',
-                display: 'block',
-                userSelect: 'none',
-                boxSizing: 'border-box'
-            },
-            "fm_current_path": {
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                "border-radius": '4px',
-                width: '60%',
-                marginLeft: '16px',
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '0px 12px',
-                marginRight: '8px',
-            },
-            "fm_path_arrow": {
-                width: '12px',
-            },
-            "fm_path_folder": {
-                color: '#ffffff',
-                userSelect: 'none',
-            },
-            "fm_search": {
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                "border-radius": '4px',
-                "background-color": this.fileManagerMutableStyles.colors.main_background,
-                padding: '0px 8px',
-                color: '#ffff',
-                width: '20%',
-            },
-            "fm_grid_wrapper": {
-                display: 'flex',
-                width: '100%',
-                justifyContent: 'flex-end',
-            },
-            "fm_disabled": {
-                opacity: '0.5',
-            },
-            "fm_upload_files_block": {
-                display: 'flex',
-                flexDirection: 'column',
-                "background-color": '#3f3e3e',
-                width: '143px',
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                borderTop: 'none',
-                position: 'absolute',
-                bottom: '-84px',
-                zIndex: '10',
-                cursor: 'pointer',
-                boxSizing: 'border-box',
-            },
-            "fm_upload_files_func_wrapper": {
-                display: 'flex',
-                flexDirection: 'row',
-                padding: '8px',
-                gap: '8px',
-                alignItems: 'center',
-                width: '100%',
-                userSelect: 'none',
-                boxSizing: 'border-box',
-                position: 'relative',
-            },
-            "fm_upload_files_func_icon": {
-                width: '24px',
-            },
-            "fm_upload_files_func_name": {
-                color: '#ffff',
-                fontSize: '13px',
-                fontWeight: '500',
-            },
-            "fm_hidden": {
-                display: 'none',
-            },
-            "fm_upload_files_func_input": {
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                top: '0px',
-                left: '0px',
-                opacity: '0',
-            },
-            "fm_upload_file_func_input": {
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                top: '0px',
-                left: '0px',
-                opacity: '0',
-            },
-            "fm_tool_active": {
-                opacity: '0.6',
+            "fm_reset_settings_button:hover": {
+                "background-color": "#9aa08e",
             }
         };
-        this.headerStyleElement = document.createElement('style');
-        document.head.appendChild(this.headerStyleElement);
     }
     fmAddClass(element, classname) {
         Object.assign(element.style, this.fileManagerStyles[classname]);
@@ -362,10 +474,10 @@ class FileManagerStyles {
     fmRemoveClass(element, classname) {
         let element_styles = this.fileManagerStyles[classname];
         for (let key in element_styles) {
-            if (classname === "fm_openedFile" && key === '"background-color"') {
+            if (classname === "fm_openedFile" && key === "background-color") {
                 element.style.backgroundColor = "";
             }
-            else if (classname === "fm_folder_parent__opened" && key === '"background-color"') {
+            else if (classname === "fm_folder_parent__opened" && key === "background-color") {
                 element.style.backgroundColor = "";
             }
             else if (classname === "fm_disabled" && key === 'opacity') {
@@ -386,7 +498,37 @@ class FileManagerStyles {
             this.headerStyleElement.textContent += `}\n`;
         }
     }
+    updateUpdatableElements() {
+        for (let key in this.updatableElements) {
+            this.updatableElements[key].forEach(element => {
+                Object.assign(element.style, this.fileManagerStyles[key]);
+            });
+        }
+    }
+    updateMutableStyles() {
+        this.fileManagerMutableStyles = JSON.parse(localStorage.fmMutableStyles);
+    }
+    setMutableStyles(mutableStyles) {
+        localStorage.fmMutableStyles = JSON.stringify(mutableStyles);
+    }
+    getDefaultMutableStyles() {
+        return JSON.parse(localStorage.fmDefaultMutableStyles);
+    }
+    setDefaultMutableStyles() {
+        let defaultMutableStyles = {
+            "colors": {
+                hover: "#3e3e3e",
+                border: "#2B2B2B",
+                main_background: "#252526",
+                selected: "#4a4a4a",
+                text_color: "#ffffff"
+            },
+        };
+        localStorage.fmDefaultMutableStyles = JSON.stringify(defaultMutableStyles);
+    }
 }
+
+
 class FileManagerServer {
 }
 class FileManager {
@@ -400,6 +542,7 @@ class FileManager {
         this.duplicateState = false;
         this.cutState = false;
         this.openFolders = [];
+        this.settingsColorInput = {};
         this.toolsState = {
             remove: false,
             cut: false,
@@ -423,6 +566,48 @@ class FileManager {
         let bufferChecker = this.filemanager_root.querySelector(".fm_upload_files_block");
         if (bufferChecker instanceof HTMLElement) {
             this.uploadFilesPanel = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        bufferChecker = this.filemanager_root.querySelector(".fm_settings_panel");
+        if (bufferChecker instanceof HTMLElement) {
+            this.settingsPanel = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        bufferChecker = this.filemanager_root.querySelector(".fm_settings_panel");
+        if (bufferChecker instanceof HTMLElement) {
+            this.settingsPanel = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        bufferChecker = this.filemanager_root.querySelector(".fm_filemanager_navigation");
+        if (bufferChecker instanceof HTMLElement) {
+            this.navigationPanel = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        bufferChecker = this.filemanager_root.querySelector(".fm_filemanager_tools");
+        if (bufferChecker instanceof HTMLElement) {
+            this.toolsPanel = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        bufferChecker = this.filemanager_root.querySelector(".fm_settings_form");
+        if (bufferChecker instanceof HTMLElement) {
+            this.settingsForm = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        bufferChecker = this.filemanager_root.querySelector(".fm_filemanager_main");
+        if (bufferChecker instanceof HTMLElement) {
+            this.mainPanel = bufferChecker;
         }
         else {
             throw new Error('The hierarchy of elements was violated');
@@ -478,6 +663,12 @@ class FileManager {
         file_blockHTML.classList.add("fm_file_block");
         this.FileManagerStyles.fmAddClass(file_blockHTML, "fm_file_block");
         file_blockHTML.addEventListener("click", this.handleFileClick.bind(this));
+        if (this.FileManagerStyles.updatableElements["fm_file_block"]) {
+            this.FileManagerStyles.updatableElements["fm_file_block"].push(file_blockHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_file_block"] = [file_blockHTML];
+        }
         let file_iconHTML = document.createElement("img");
         file_iconHTML.classList.add("fm_file_icon");
         this.FileManagerStyles.fmAddClass(file_iconHTML, "fm_file_icon");
@@ -486,6 +677,12 @@ class FileManager {
         file_typeHTML.classList.add("fm_file_metadata");
         this.FileManagerStyles.fmAddClass(file_typeHTML, "fm_file_type");
         this.FileManagerStyles.fmAddClass(file_typeHTML, "fm_file_metadata");
+        if (this.FileManagerStyles.updatableElements["fm_file_metadata"]) {
+            this.FileManagerStyles.updatableElements["fm_file_metadata"].push(file_typeHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_file_metadata"] = [file_typeHTML];
+        }
         if (file.isFolder) {
             file_iconHTML.src = "icons/folder.png";
             file_typeHTML.textContent = "Folder";
@@ -506,18 +703,21 @@ class FileManager {
         file_nameHTML.classList.add("fm_file_metadata");
         this.FileManagerStyles.fmAddClass(file_nameHTML, "fm_file_name");
         this.FileManagerStyles.fmAddClass(file_nameHTML, "fm_file_metadata");
+        this.FileManagerStyles.updatableElements["fm_file_metadata"].push(file_nameHTML);
         file_nameHTML.textContent = file.name;
         let file_changedateHTML = document.createElement("span");
         file_changedateHTML.classList.add("fm_file_changedate");
         file_changedateHTML.classList.add("fm_file_metadata");
         this.FileManagerStyles.fmAddClass(file_changedateHTML, "fm_file_changedate");
         this.FileManagerStyles.fmAddClass(file_changedateHTML, "fm_file_metadata");
+        this.FileManagerStyles.updatableElements["fm_file_metadata"].push(file_changedateHTML);
         file_changedateHTML.textContent = file.changedate;
         let file_sizeHTML = document.createElement("span");
         file_sizeHTML.classList.add("fm_file_size");
         file_sizeHTML.classList.add("fm_file_metadata");
         this.FileManagerStyles.fmAddClass(file_sizeHTML, "fm_file_size");
         this.FileManagerStyles.fmAddClass(file_sizeHTML, "fm_file_metadata");
+        this.FileManagerStyles.updatableElements["fm_file_metadata"].push(file_sizeHTML);
         if (!file.isFolder) {
             // let size = Number(file.size.replace(/^\D+/g, ''));
             const match = file.size.match(/-?\d+(\.\d+)?/);
@@ -575,6 +775,12 @@ class FileManager {
         folder_nameHTML.classList.add("fm_folder_name");
         this.FileManagerStyles.fmAddClass(folder_nameHTML, "fm_folder_name");
         folder_nameHTML.textContent = folder.name;
+        if (this.FileManagerStyles.updatableElements["fm_folder_name"]) {
+            this.FileManagerStyles.updatableElements["fm_folder_name"].push(folder_nameHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_folder_name"] = [folder_nameHTML];
+        }
         folder_open_icon_wrapperHTML.append(folder_open_iconHTML);
         folderHTML.append(folder_open_icon_wrapperHTML);
         folderHTML.append(folder_iconHTML);
@@ -682,6 +888,7 @@ class FileManager {
             }
             folder_parent === null || folder_parent === void 0 ? void 0 : folder_parent.classList.add("fm_folder_parent__opened");
             this.FileManagerStyles.fmAddClass(folder_parent, "fm_folder_parent__opened");
+            this.FileManagerStyles.updatableElements["fm_folder_parent__opened"] = [folder_parent];
             this.currentFolder = folder_parent;
         }
     }
@@ -729,6 +936,7 @@ class FileManager {
         let root_path = document.createElement("span");
         root_path.classList.add("fm_path_folder");
         this.FileManagerStyles.fmAddClass(root_path, "fm_path_folder");
+        this.FileManagerStyles.updatableElements["fm_path_folder"] = [root_path];
         root_path.textContent = this.rootFolderName;
         this.currentPathElem.append(root_path);
         if (path_elements[1] !== '') {
@@ -740,6 +948,7 @@ class FileManager {
                 let path_folder = document.createElement("span");
                 path_folder.classList.add("fm_path_folder");
                 this.FileManagerStyles.fmAddClass(path_folder, "fm_path_folder");
+                this.FileManagerStyles.updatableElements["fm_path_folder"].push(path_folder);
                 path_folder.textContent = path_elements[i];
                 this.currentPathElem.append(path_img);
                 this.currentPathElem.append(path_folder);
@@ -786,6 +995,61 @@ class FileManager {
         else {
             this.FileManagerStyles.fmAddClass(this.uploadFilesPanel, "fm_hidden");
             this.uploadFilesPanel.classList.add("fm_hidden");
+        }
+    }
+    handleSubmitSettings(event) {
+        event.preventDefault();
+        let newMutableStyles = {
+            "colors": {
+                hover: this.settingsForm.hover_color.value,
+                border: this.settingsForm.border_color.value,
+                main_background: this.settingsForm.background_color.value,
+                selected: this.settingsForm.select_color.value,
+                text_color: this.settingsForm.text_color.value
+            }
+        };
+        this.FileManagerStyles.setMutableStyles(newMutableStyles);
+        this.FileManagerStyles.updateMutableStyles();
+        this.FileManagerStyles.updateFileManagerStyles();
+        this.FileManagerStyles.updateFileManagerHeaderStyles();
+        this.FileManagerStyles.updateHeaderStyles();
+        this.FileManagerStyles.updateUpdatableElements();
+        this.mainPanel.style.display = "none";
+        this.toolsPanel.style.display = "none";
+        this.navigationPanel.style.display = "none";
+        this.FileManagerStyles.fmAddClass(this.uploadFilesPanel, "fm_hidden");
+        let message_submitHTML = this.filemanager_root.querySelector(".fm_message_submit");
+        console.log(message_submitHTML);
+        if (message_submitHTML instanceof HTMLElement) {
+            message_submitHTML.textContent = "Success";
+            setTimeout(() => {
+                message_submitHTML.textContent = "";
+            }, 2000);
+        }
+    }
+    handleResetSettings(event) {
+        event.preventDefault();
+        let result = window.confirm("Are you sure you want to reset?");
+        if (result) {
+            let newMutableStyles = this.FileManagerStyles.getDefaultMutableStyles();
+            this.FileManagerStyles.setMutableStyles(newMutableStyles);
+            this.FileManagerStyles.updateMutableStyles();
+            this.FileManagerStyles.updateFileManagerStyles();
+            this.FileManagerStyles.updateFileManagerHeaderStyles();
+            this.FileManagerStyles.updateHeaderStyles();
+            this.FileManagerStyles.updateUpdatableElements();
+            this.updateSettingsColorInputs();
+            this.mainPanel.style.display = "none";
+            this.toolsPanel.style.display = "none";
+            this.navigationPanel.style.display = "none";
+            this.FileManagerStyles.fmAddClass(this.uploadFilesPanel, "fm_hidden");
+            let message_submitHTML = this.filemanager_root.querySelector(".fm_message_submit");
+            if (message_submitHTML instanceof HTMLElement) {
+                message_submitHTML.textContent = "Success";
+                setTimeout(() => {
+                    message_submitHTML.textContent = "";
+                }, 2000);
+            }
         }
     }
     updateFileList(targetElement_1) {
@@ -1240,6 +1504,20 @@ class FileManager {
             }
         });
     }
+    handleSettingsClick() {
+        if (this.settingsPanel.style.display === "block") {
+            this.settingsPanel.style.display = "none";
+            this.mainPanel.style.display = "flex";
+            this.toolsPanel.style.display = "flex";
+            this.navigationPanel.style.display = "flex";
+        }
+        else {
+            this.settingsPanel.style.display = "block";
+            this.mainPanel.style.display = "none";
+            this.toolsPanel.style.display = "none";
+            this.navigationPanel.style.display = "none";
+        }
+    }
     handleFileClick(event) {
         if (event.target instanceof HTMLElement) {
             const file_block = event.target.closest(".fm_file_block");
@@ -1303,6 +1581,11 @@ class FileManager {
             }
         });
     }
+    updateSettingsColorInputs() {
+        for (let key in this.settingsColorInput) {
+            this.settingsColorInput[key].value = this.FileManagerStyles.fileManagerMutableStyles.colors[key];
+        }
+    }
     initInterface() {
         // Creating filemanager_navigation
         let filemanager_super_root = document.createElement("div");
@@ -1311,17 +1594,21 @@ class FileManager {
         let filemanager_navigationHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(filemanager_navigationHTML, "fm_filemanager_navigation");
         filemanager_navigationHTML.classList.add("fm_filemanager_navigation");
+        this.FileManagerStyles.updatableElements["fm_filemanager_navigation"] = [filemanager_navigationHTML];
         let arrows_blockHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(arrows_blockHTML, "fm_arrows_block");
         arrows_blockHTML.classList.add("fm_arrows_block");
+        this.FileManagerStyles.updatableElements["fm_arrows_block"] = [arrows_blockHTML];
         let current_pathHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(current_pathHTML, "fm_current_path");
         current_pathHTML.classList.add("fm_current_path");
+        this.FileManagerStyles.updatableElements["fm_current_path"] = [current_pathHTML];
         let searchHTML = document.createElement("input");
         searchHTML.type = "text";
         searchHTML.placeholder = "Searching";
         this.FileManagerStyles.fmAddClass(searchHTML, "fm_search");
         searchHTML.classList.add("fm_search");
+        this.FileManagerStyles.updatableElements["fm_search"] = [searchHTML];
         let arrow_backHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(arrow_backHTML, "fm_arrow_wrapper");
         this.FileManagerStyles.fmAddClass(arrow_backHTML, "fm_arrow_back");
@@ -1364,6 +1651,7 @@ class FileManager {
         let path_folderHTML = document.createElement("span");
         this.FileManagerStyles.fmAddClass(path_folderHTML, "fm_path_folder");
         path_folderHTML.classList.add("fm_path_folder");
+        this.FileManagerStyles.updatableElements["fm_path_folder"] = [path_folderHTML];
         path_folderHTML.textContent = this.rootFolderName;
         current_pathHTML.append(path_folderHTML);
         filemanager_navigationHTML.append(arrows_blockHTML);
@@ -1373,15 +1661,18 @@ class FileManager {
         let filemanager_mainHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(filemanager_mainHTML, "fm_filemanager_main");
         filemanager_mainHTML.classList.add("fm_filemanager_main");
+        this.FileManagerStyles.updatableElements["fm_filemanager_main"] = [filemanager_mainHTML];
         // Creating filemanager_tools
         let filemanager_toolsHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(filemanager_toolsHTML, "fm_filemanager_tools");
         filemanager_toolsHTML.classList.add("fm_filemanager_tools");
+        this.FileManagerStyles.updatableElements["fm_filemanager_tools"] = [filemanager_toolsHTML];
         filemanager_toolsHTML.style.position = "relative";
         let add_file_buttonHTML = document.createElement("button");
         add_file_buttonHTML.type = "button";
         this.FileManagerStyles.fmAddClass(add_file_buttonHTML, "fm_add_file_button");
         add_file_buttonHTML.classList.add("fm_add_file_button");
+        this.FileManagerStyles.updatableElements["fm_add_file_button"] = [add_file_buttonHTML];
         add_file_buttonHTML.addEventListener("click", this.handleUploadClick.bind(this));
         let add_file_iconHTML = document.createElement("img");
         add_file_iconHTML.src = "icons/sticky-notes.png";
@@ -1394,6 +1685,7 @@ class FileManager {
         let upload_files_blockHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(upload_files_blockHTML, "fm_upload_files_block");
         this.FileManagerStyles.fmAddClass(upload_files_blockHTML, "fm_hidden");
+        this.FileManagerStyles.updatableElements["fm_upload_files_block"] = [upload_files_blockHTML];
         upload_files_blockHTML.classList.add("fm_upload_files_block");
         upload_files_blockHTML.classList.add("fm_hidden");
         let upload_files_wrapperHTML1 = document.createElement("div");
@@ -1410,6 +1702,7 @@ class FileManager {
         upload_file_spanHTML.textContent = "Upload file";
         this.FileManagerStyles.fmAddClass(upload_file_spanHTML, "fm_upload_files_func_name");
         upload_file_spanHTML.classList.add("fm_upload_files_func_name");
+        this.FileManagerStyles.updatableElements["fm_upload_files_func_name"] = [upload_file_spanHTML];
         upload_files_wrapperHTML1.append(upload_file_spanHTML);
         let upload_file_inputHTML = document.createElement("input");
         this.FileManagerStyles.fmAddClass(upload_file_inputHTML, "fm_upload_file_func_input");
@@ -1434,6 +1727,7 @@ class FileManager {
         this.FileManagerStyles.fmAddClass(upload_file_spanHTML2, "fm_upload_files_func_name");
         upload_file_spanHTML2.classList.add("fm_upload_files_func_name");
         upload_files_wrapperHTML2.append(upload_file_spanHTML2);
+        this.FileManagerStyles.updatableElements["fm_upload_files_func_name"].push(upload_file_spanHTML2);
         let upload_file_inputHTML2 = document.createElement("input");
         this.FileManagerStyles.fmAddClass(upload_file_inputHTML2, "fm_upload_files_func_input");
         upload_file_inputHTML2.classList.add("fm_upload_files_func_input");
@@ -1498,6 +1792,13 @@ class FileManager {
         gridHTML.classList.add("fm_grid");
         grid_wrapperHTML.append(tableHTML);
         grid_wrapperHTML.append(gridHTML);
+        let settingsHTML = document.createElement("img");
+        settingsHTML.src = "icons/gear.png";
+        this.FileManagerStyles.fmAddClass(settingsHTML, "fm_tool");
+        this.FileManagerStyles.fmAddClass(settingsHTML, "fm_settings");
+        settingsHTML.classList.add("fm_tool");
+        settingsHTML.classList.add("fm_settings");
+        settingsHTML.addEventListener("click", this.handleSettingsClick.bind(this));
         filemanager_toolsHTML.append(add_file_buttonHTML);
         filemanager_toolsHTML.append(cutHTML);
         filemanager_toolsHTML.append(duplicateHTML);
@@ -1505,11 +1806,13 @@ class FileManager {
         filemanager_toolsHTML.append(renameHTML);
         filemanager_toolsHTML.append(removeHTML);
         filemanager_toolsHTML.append(grid_wrapperHTML);
+        filemanager_toolsHTML.append(settingsHTML);
         filemanager_super_root.append(filemanager_toolsHTML);
         // Creating folders_nav
         let folders_navHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(folders_navHTML, "fm_folders_nav");
         folders_navHTML.classList.add("fm_folders_nav");
+        this.FileManagerStyles.updatableElements["fm_folders_nav"] = [folders_navHTML];
         let rootfolder = this.createHTMLNavFolder({ name: this.rootFolderName }, folders_navHTML, true);
         if (rootfolder) {
             let rootfolder_icon_wrapper = rootfolder[0];
@@ -1527,9 +1830,11 @@ class FileManager {
         let files_panelHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(files_panelHTML, "fm_files_panel");
         files_panelHTML.classList.add("fm_files_panel");
+        this.FileManagerStyles.updatableElements["fm_files_panel"] = [files_panelHTML];
         let metadata_blockHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(metadata_blockHTML, "fm_metadata_block");
         metadata_blockHTML.classList.add("fm_metadata_block");
+        this.FileManagerStyles.updatableElements["fm_metadata_block"] = [metadata_blockHTML];
         this.files_listHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(this.files_listHTML, "fm_files_list");
         this.files_listHTML.classList.add("fm_files_list");
@@ -1565,6 +1870,130 @@ class FileManager {
         files_panelHTML.append(this.files_listHTML);
         filemanager_mainHTML.append(files_panelHTML);
         filemanager_super_root.append(filemanager_mainHTML);
+        // Creating settings panel
+        let settings_panelHTML = document.createElement("div");
+        this.FileManagerStyles.fmAddClass(settings_panelHTML, "fm_settings_panel");
+        settings_panelHTML.classList.add("fm_settings_panel");
+        this.FileManagerStyles.updatableElements["fm_settings_panel"] = [settings_panelHTML];
+        settings_panelHTML.style.display = "none";
+        let title_blockHTML = document.createElement("div");
+        this.FileManagerStyles.fmAddClass(title_blockHTML, "fm_title_block");
+        title_blockHTML.classList.add("fm_title_block");
+        this.FileManagerStyles.updatableElements["fm_title_block"] = [title_blockHTML];
+        title_blockHTML.textContent = "Settings";
+        let leave_settings_arrowHTML = document.createElement("img");
+        this.FileManagerStyles.fmAddClass(leave_settings_arrowHTML, "fm_leave_settings_arrow");
+        this.FileManagerStyles.fmAddClass(leave_settings_arrowHTML, "fm_tool");
+        leave_settings_arrowHTML.classList.add("fm_leave_settings_arrow");
+        leave_settings_arrowHTML.classList.add("fm_tool");
+        leave_settings_arrowHTML.style.margin = "0px";
+        leave_settings_arrowHTML.src = "icons/next-left.png";
+        leave_settings_arrowHTML.addEventListener("click", this.handleSettingsClick.bind(this));
+        title_blockHTML.append(leave_settings_arrowHTML);
+        let settingsFormHTML = document.createElement("form");
+        this.FileManagerStyles.fmAddClass(settingsFormHTML, "fm_settings_form");
+        settingsFormHTML.classList.add("fm_settings_form");
+        settingsFormHTML.name = "fm_settings_form";
+        settingsFormHTML.addEventListener("submit", this.handleSubmitSettings.bind(this));
+        let params_panelHTML = document.createElement("div");
+        this.FileManagerStyles.fmAddClass(params_panelHTML, "fm_params_panel");
+        params_panelHTML.classList.add("fm_params_panel");
+        let hover_colorHTML = document.createElement("input");
+        this.FileManagerStyles.fmAddClass(hover_colorHTML, "fm_color_input");
+        hover_colorHTML.classList.add("fm_color_input");
+        hover_colorHTML.type = "color";
+        hover_colorHTML.name = "hover_color";
+        hover_colorHTML.value = this.FileManagerStyles.fileManagerMutableStyles.colors.hover;
+        this.settingsColorInput["hover"] = hover_colorHTML;
+        let hover_color_labelHTML = document.createElement("label");
+        this.FileManagerStyles.fmAddClass(hover_color_labelHTML, "fm_color_label");
+        hover_color_labelHTML.classList.add("fm_color_label");
+        this.FileManagerStyles.updatableElements["fm_color_label"] = [hover_color_labelHTML];
+        hover_color_labelHTML.innerHTML = "Hover color:<br>";
+        hover_color_labelHTML.append(hover_colorHTML);
+        let background_colorHTML = document.createElement("input");
+        this.FileManagerStyles.fmAddClass(background_colorHTML, "fm_color_input");
+        background_colorHTML.classList.add("fm_color_input");
+        background_colorHTML.type = "color";
+        background_colorHTML.name = "background_color";
+        background_colorHTML.value = this.FileManagerStyles.fileManagerMutableStyles.colors.main_background;
+        this.settingsColorInput["main_background"] = background_colorHTML;
+        let background_color_labelHTML = document.createElement("label");
+        this.FileManagerStyles.fmAddClass(background_color_labelHTML, "fm_color_label");
+        background_color_labelHTML.classList.add("fm_color_label");
+        this.FileManagerStyles.updatableElements["fm_color_label"].push(background_color_labelHTML);
+        background_color_labelHTML.innerHTML = "Background color:<br>";
+        background_color_labelHTML.append(background_colorHTML);
+        let border_colorHTML = document.createElement("input");
+        this.FileManagerStyles.fmAddClass(border_colorHTML, "fm_color_input");
+        border_colorHTML.classList.add("fm_color_input");
+        border_colorHTML.type = "color";
+        border_colorHTML.name = "border_color";
+        border_colorHTML.value = this.FileManagerStyles.fileManagerMutableStyles.colors.border;
+        this.settingsColorInput["border"] = border_colorHTML;
+        let border_color_labelHTML = document.createElement("label");
+        this.FileManagerStyles.fmAddClass(border_color_labelHTML, "fm_color_label");
+        border_color_labelHTML.classList.add("fm_color_label");
+        this.FileManagerStyles.updatableElements["fm_color_label"].push(border_color_labelHTML);
+        border_color_labelHTML.innerHTML = "Border color:<br>";
+        border_color_labelHTML.append(border_colorHTML);
+        let select_colorHTML = document.createElement("input");
+        this.FileManagerStyles.fmAddClass(select_colorHTML, "fm_color_input");
+        select_colorHTML.classList.add("fm_color_input");
+        select_colorHTML.type = "color";
+        select_colorHTML.name = "select_color";
+        select_colorHTML.value = this.FileManagerStyles.fileManagerMutableStyles.colors.selected;
+        this.settingsColorInput["selected"] = select_colorHTML;
+        let select_color_labelHTML = document.createElement("label");
+        this.FileManagerStyles.fmAddClass(select_color_labelHTML, "fm_color_label");
+        select_color_labelHTML.classList.add("fm_color_label");
+        this.FileManagerStyles.updatableElements["fm_color_label"].push(select_color_labelHTML);
+        select_color_labelHTML.innerHTML = "Select color:<br>";
+        select_color_labelHTML.append(select_colorHTML);
+        let text_colorHTML = document.createElement("input");
+        this.FileManagerStyles.fmAddClass(text_colorHTML, "fm_color_input");
+        text_colorHTML.classList.add("fm_color_input");
+        text_colorHTML.type = "color";
+        text_colorHTML.name = "text_color";
+        text_colorHTML.value = this.FileManagerStyles.fileManagerMutableStyles.colors.text_color;
+        this.settingsColorInput["text_color"] = text_colorHTML;
+        let text_color_labelHTML = document.createElement("label");
+        this.FileManagerStyles.fmAddClass(text_color_labelHTML, "fm_color_label");
+        text_color_labelHTML.classList.add("fm_color_label");
+        this.FileManagerStyles.updatableElements["fm_color_label"].push(text_color_labelHTML);
+        text_color_labelHTML.innerHTML = "Text color:<br>";
+        text_color_labelHTML.append(text_colorHTML);
+        let buttons_panelHTML = document.createElement("div");
+        this.FileManagerStyles.fmAddClass(buttons_panelHTML, "fm_buttons_panel");
+        buttons_panelHTML.classList.add("fm_buttons_panel");
+        let message_submitHTML = document.createElement("span");
+        this.FileManagerStyles.fmAddClass(message_submitHTML, "fm_message_submit");
+        message_submitHTML.classList.add("fm_message_submit");
+        message_submitHTML.textContent = "";
+        let reset_settings_buttonHTML = document.createElement("button");
+        this.FileManagerStyles.fmAddClass(reset_settings_buttonHTML, "fm_reset_settings_button");
+        reset_settings_buttonHTML.classList.add("fm_reset_settings_button");
+        reset_settings_buttonHTML.textContent = "To default";
+        reset_settings_buttonHTML.type = "button";
+        reset_settings_buttonHTML.addEventListener("click", this.handleResetSettings.bind(this));
+        let submit_settings_buttonHTML = document.createElement("button");
+        this.FileManagerStyles.fmAddClass(submit_settings_buttonHTML, "fm_submit_settings_button");
+        submit_settings_buttonHTML.classList.add("fm_submit_settings_button");
+        submit_settings_buttonHTML.textContent = "Submit";
+        submit_settings_buttonHTML.type = "submit";
+        params_panelHTML.append(hover_color_labelHTML);
+        params_panelHTML.append(background_color_labelHTML);
+        params_panelHTML.append(border_color_labelHTML);
+        params_panelHTML.append(select_color_labelHTML);
+        params_panelHTML.append(text_color_labelHTML);
+        buttons_panelHTML.append(message_submitHTML);
+        buttons_panelHTML.append(reset_settings_buttonHTML);
+        buttons_panelHTML.append(submit_settings_buttonHTML);
+        settingsFormHTML.append(params_panelHTML);
+        settingsFormHTML.append(buttons_panelHTML);
+        settings_panelHTML.append(title_blockHTML);
+        settings_panelHTML.append(settingsFormHTML);
+        filemanager_super_root.append(settings_panelHTML);
         this.root.append(filemanager_super_root);
         return filemanager_super_root;
     }
