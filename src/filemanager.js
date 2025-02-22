@@ -8,8 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-
-"use strict";
 class FileManagerStyles {
     constructor() {
         this.updatableElements = {};
@@ -58,6 +56,8 @@ class FileManagerStyles {
                 height: '100%',
                 scrollbarWidth: 'thin',
                 scrollbarColor: `#888 ${this.fileManagerMutableStyles.colors.border}`,
+                display: "flex",
+                "box-sizing": "border-box",
             },
             "fm_folder_icon": {
                 width: '22px',
@@ -66,6 +66,9 @@ class FileManagerStyles {
             "fm_folder_name": {
                 fontSize: '14px',
                 color: this.fileManagerMutableStyles.colors.text_color,
+                "text-overflow": "ellipsis",
+                "width": "90%",
+                "white-space": "nowrap",
             },
             "fm_folder": {
                 display: 'flex',
@@ -79,6 +82,7 @@ class FileManagerStyles {
                 alignItems: 'center',
                 cursor: 'pointer',
                 width: '100%',
+                "overflow": "hidden",
             },
             "fm_folder_open_icon_wrapper": {
                 paddingLeft: '4px',
@@ -97,6 +101,9 @@ class FileManagerStyles {
                 position: 'relative',
                 left: '24px',
                 userSelect: 'none',
+                "box-sizing": "border-box",
+                "min-width": '100%',
+                display: "table"
             },
             "fm_folder_root_wrapper": {
                 position: 'static',
@@ -157,9 +164,11 @@ class FileManagerStyles {
                 padding: '8px 0px',
             },
             "fm_file_metadata": {
-                overflow: 'hidden',
+                // overflow: 'hidden',
                 userSelect: 'none',
                 color: this.fileManagerMutableStyles.colors.text_color,
+                "margin-right": '2%',
+                "text-overflow": "ellipsis",
             },
             "fm_file_block": {
                 display: 'flex',
@@ -177,9 +186,9 @@ class FileManagerStyles {
             },
             "fm_file_name": {
                 width: '31%',
-                marginRight: '2%',
                 overflow: 'hidden',
                 "box-sizing": "border-box",
+                "white-space": "nowrap",
             },
             "fm_filemanager_tools": {
                 border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
@@ -255,6 +264,8 @@ class FileManagerStyles {
                 gap: '8px',
                 padding: '0px 12px',
                 marginRight: '8px',
+                "overflow": "hidden",
+                "white-space": "nowrap",
             },
             "fm_path_arrow": {
                 width: '12px',
@@ -409,6 +420,71 @@ class FileManagerStyles {
             "fm_message_submit": {
                 color: "#a7d649"
             },
+            "fm_files_tiles": {
+                display: "flex",
+                "flex-wrap": "wrap",
+                "flex-direction": "row",
+                // "justify-content": "center",
+                "row-gap": "8px",
+                "column-gap": "1%",
+                padding: "12px",
+                "box-sizing": "border-box",
+                "height": "100%",
+                "align-content": "flex-start",
+            },
+            "fm_selected": {
+                "background-color": this.fileManagerMutableStyles.colors.selected,
+                "border-radius": "4px"
+            },
+            "fm_file_block_tiles": {
+                width: "90px",
+                display: 'flex',
+                "flex-direction": 'column',
+                "align-items": 'center',
+                "justify-content": "space-beetwen",
+                gap: "8px",
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                padding: '6px',
+                cursor: 'pointer',
+                "box-sizing": "border-box",
+                "border-radius": "6px",
+                "overflow": "hidden",
+                height: "25%",
+                // "justify-content": "center",
+            },
+            "fm_file_name_tiles": {
+                // width: '80px',
+                "box-sizing": "border-box",
+                "font-size": "14px",
+                "text-align": "center",
+                // "overflow": "hidden",
+                "word-break": "break-all",
+                "max-height": "90%",
+                "display": "flex",
+                "text-overflow": "ellipsis",
+            },
+            "fm_file_icon_tiles": {
+                "max-width": '62px',
+                "max-height": "41px",
+                "user-select": 'none',
+            },
+            "fm_loader": {
+                width: "48px",
+                height: "48px",
+                // border: "5px solid #fff",
+                "border-radius": "50%",
+                display: "inline-block",
+                "box-sizing": "border-box",
+                "border-top": "4px solid #FFF",
+                "border-right": "4px solid transparent",
+            },
+            "fm_loader_wrapper": {
+                display: "flex",
+                width: "100%",
+                height: "100%",
+                "align-items": "center",
+                "justify-content": "center",
+            }
         };
     }
     updateFileManagerHeaderStyles() {
@@ -454,6 +530,9 @@ class FileManagerStyles {
             "fm_file_block:hover": {
                 "background-color": this.fileManagerMutableStyles.colors.hover
             },
+            "fm_file_block_tiles:hover": {
+                "background-color": this.fileManagerMutableStyles.colors.hover
+            },
             "fm_search:focus": {
                 "background-color": this.fileManagerMutableStyles.colors.hover,
             },
@@ -465,7 +544,7 @@ class FileManagerStyles {
             },
             "fm_reset_settings_button:hover": {
                 "background-color": "#9aa08e",
-            }
+            },
         };
     }
     fmAddClass(element, classname) {
@@ -480,6 +559,9 @@ class FileManagerStyles {
             else if (classname === "fm_folder_parent__opened" && key === "background-color") {
                 element.style.backgroundColor = "";
             }
+            else if (classname === "fm_selected" && key === "background-color") {
+                element.style.backgroundColor = "";
+            }
             else if (classname === "fm_disabled" && key === 'opacity') {
                 element.style.opacity = "1";
             }
@@ -489,7 +571,20 @@ class FileManagerStyles {
         }
     }
     updateHeaderStyles() {
-        this.headerStyleElement.textContent = "";
+        this.headerStyleElement.textContent = `
+            .fm_loader::after {
+                content: '';  
+                box-sizing: border-box;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                border-bottom: 4px solid #FF3D00;
+                border-left: 4px solid transparent;
+            }
+        `;
         for (let classname in this.fileManagerHeaderStyles) {
             this.headerStyleElement.textContent += `.${classname} {\n`;
             for (let style in this.fileManagerHeaderStyles[classname]) {
@@ -526,8 +621,17 @@ class FileManagerStyles {
         };
         localStorage.fmDefaultMutableStyles = JSON.stringify(defaultMutableStyles);
     }
+    addRotationAnimation(element) {
+        element.animate([
+            { transform: 'rotate(0deg)' },
+            { transform: 'rotate(360deg)' }
+        ], {
+            duration: 1000,
+            iterations: Infinity,
+            easing: 'linear'
+        });
+    }
 }
-
 
 class FileManagerServer {
 }
@@ -550,6 +654,13 @@ class FileManager {
             insert: false,
             rename: false
         };
+        if (localStorage.fmFilesDisplayMode) {
+            this.filesDisplayMode = localStorage.fmFilesDisplayMode;
+        }
+        else {
+            localStorage.fmFilesDisplayMode = "list";
+            this.filesDisplayMode = "list";
+        }
         this.FileManagerStyles.updateHeaderStyles();
         this.rootFolderName = rootFolderName;
         this.FileManagerServer = FileManagerServer;
@@ -619,6 +730,34 @@ class FileManager {
         else {
             throw new Error('The hierarchy of elements was violated');
         }
+        bufferChecker = this.filemanager_root.querySelector(".fm_files_tiles");
+        if (bufferChecker instanceof HTMLElement) {
+            this.filesTilesElement = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        bufferChecker = this.filemanager_root.querySelector(".fm_files_list");
+        if (bufferChecker instanceof HTMLElement) {
+            this.files_listHTML = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        bufferChecker = this.filemanager_root.querySelector(".fm_metadata_block");
+        if (bufferChecker instanceof HTMLElement) {
+            this.files_metadataHTML = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
+        bufferChecker = this.filemanager_root.querySelector(".fm_loader_wrapper");
+        if (bufferChecker instanceof HTMLElement) {
+            this.loaderElem = bufferChecker;
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
         const back_arrow = this.filemanager_root.querySelector(".fm_arrow_back");
         const up_arrow = this.filemanager_root.querySelector(".fm_arrow_up");
         if (back_arrow instanceof HTMLElement && up_arrow instanceof HTMLElement) {
@@ -647,6 +786,17 @@ class FileManager {
         else {
             throw new Error('The hierarchy of elements was violated');
         }
+        const listDisplayModeIcon = this.filemanager_root.querySelector(".fm_list");
+        const tilesDisplayModeIcon = this.filemanager_root.querySelector(".fm_tiles");
+        if (listDisplayModeIcon instanceof HTMLElement && tilesDisplayModeIcon instanceof HTMLElement) {
+            this.displayModesElements = {
+                list: listDisplayModeIcon,
+                tiles: tilesDisplayModeIcon,
+            };
+        }
+        else {
+            throw new Error('The hierarchy of elements was violated');
+        }
         this.updateBackArrow();
         bufferChecker = document.querySelector(".fm_folder_root_wrapper");
         let root_parent = bufferChecker === null || bufferChecker === void 0 ? void 0 : bufferChecker.querySelector(".fm_folder_parent");
@@ -656,9 +806,10 @@ class FileManager {
         else {
             throw new Error('The hierarchy of elements was violated');
         }
+        this.updateListDisplayIcon();
+        this.updateTilesDisplayIcon();
     }
     createHTMLFileList(file) {
-        var _a;
         let file_blockHTML = document.createElement("div");
         file_blockHTML.classList.add("fm_file_block");
         this.FileManagerStyles.fmAddClass(file_blockHTML, "fm_file_block");
@@ -742,7 +893,56 @@ class FileManager {
         file_blockHTML.append(file_changedateHTML);
         file_blockHTML.append(file_typeHTML);
         file_blockHTML.append(file_sizeHTML);
-        (_a = this.files_listHTML) === null || _a === void 0 ? void 0 : _a.append(file_blockHTML);
+        this.files_listHTML.append(file_blockHTML);
+        return file_blockHTML;
+    }
+    createHTMLFileTiles(file) {
+        let file_blockHTML = document.createElement("div");
+        file_blockHTML.classList.add("fm_file_block");
+        file_blockHTML.classList.add("fm_file_block_tiles");
+        this.FileManagerStyles.fmAddClass(file_blockHTML, "fm_file_block_tiles");
+        file_blockHTML.addEventListener("click", this.handleFileClick.bind(this));
+        if (this.FileManagerStyles.updatableElements["fm_file_block_tiles"]) {
+            this.FileManagerStyles.updatableElements["fm_file_block_tiles"].push(file_blockHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_file_block_tiles"] = [file_blockHTML];
+        }
+        let file_iconHTML = document.createElement("img");
+        file_iconHTML.classList.add("fm_file_icon");
+        this.FileManagerStyles.fmAddClass(file_iconHTML, "fm_file_icon_tiles");
+        if (file.isFolder) {
+            file_iconHTML.src = "icons/folder.png";
+        }
+        else {
+            let ext = file.name.split('.');
+            if (this.image_extension.includes(ext[ext.length - 1])) {
+                if (file.image) {
+                    file_iconHTML.src = file.image;
+                }
+                else {
+                    file_iconHTML.src = "icons/picture.png";
+                }
+            }
+            else {
+                file_iconHTML.src = "icons/textfile.png";
+            }
+        }
+        let file_nameHTML = document.createElement("span");
+        file_nameHTML.classList.add("fm_file_name");
+        file_nameHTML.classList.add("fm_file_metadata");
+        this.FileManagerStyles.fmAddClass(file_nameHTML, "fm_file_name_tiles");
+        this.FileManagerStyles.fmAddClass(file_nameHTML, "fm_file_metadata");
+        file_nameHTML.textContent = file.name;
+        if (this.FileManagerStyles.updatableElements["fm_file_metadata"]) {
+            this.FileManagerStyles.updatableElements["fm_file_metadata"].push(file_nameHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_file_metadata"] = [file_nameHTML];
+        }
+        file_blockHTML.append(file_iconHTML);
+        file_blockHTML.append(file_nameHTML);
+        this.filesTilesElement.append(file_blockHTML);
         return file_blockHTML;
     }
     createHTMLNavFolder(folder, root, initial = false) {
@@ -902,6 +1102,66 @@ class FileManager {
             throw new Error('The hierarchy of elements was violated');
         }
     }
+    updateListDisplayIcon() {
+        if (this.filesDisplayMode === "list") {
+            this.displayModesElements.list.classList.add("fm_disabled");
+            this.displayModesElements.list.classList.add("fm_selected");
+            this.FileManagerStyles.fmAddClass(this.displayModesElements.list, "fm_disabled");
+            this.FileManagerStyles.fmAddClass(this.displayModesElements.list, "fm_selected");
+            this.displayModesElements.list.style.pointerEvents = 'none';
+        }
+        else {
+            this.displayModesElements.list.classList.remove("fm_disabled");
+            this.displayModesElements.list.classList.remove("fm_selected");
+            this.FileManagerStyles.fmRemoveClass(this.displayModesElements.list, "fm_disabled");
+            this.FileManagerStyles.fmRemoveClass(this.displayModesElements.list, "fm_selected");
+            this.displayModesElements.list.style.pointerEvents = 'auto';
+        }
+    }
+    updateTilesDisplayIcon() {
+        if (this.filesDisplayMode === "tiles") {
+            this.displayModesElements.tiles.classList.add("fm_disabled");
+            this.displayModesElements.tiles.classList.add("fm_selected");
+            this.FileManagerStyles.fmAddClass(this.displayModesElements.tiles, "fm_disabled");
+            this.FileManagerStyles.fmAddClass(this.displayModesElements.tiles, "fm_selected");
+            this.displayModesElements.tiles.style.pointerEvents = 'none';
+        }
+        else {
+            this.displayModesElements.tiles.classList.remove("fm_disabled");
+            this.displayModesElements.tiles.classList.remove("fm_selected");
+            this.FileManagerStyles.fmRemoveClass(this.displayModesElements.tiles, "fm_disabled");
+            this.FileManagerStyles.fmRemoveClass(this.displayModesElements.tiles, "fm_selected");
+            this.displayModesElements.tiles.style.pointerEvents = 'auto';
+        }
+    }
+    handleListDisplayModeClick(event) {
+        if (this.filesDisplayMode !== "list") {
+            localStorage.fmFilesDisplayMode = "list";
+            this.filesDisplayMode = "list";
+            this.files_listHTML.style.display = "block";
+            this.files_metadataHTML.style.display = "flex";
+            this.filesTilesElement.style.display = "none";
+            if (this.currentFolder instanceof HTMLElement) {
+                this.updateFileList(this.currentFolder, true);
+            }
+            this.updateListDisplayIcon();
+            this.updateTilesDisplayIcon();
+        }
+    }
+    handleTilesDisplayModeClick(event) {
+        if (this.filesDisplayMode !== "tiles") {
+            localStorage.fmFilesDisplayMode = "tiles";
+            this.filesDisplayMode = "tiles";
+            this.files_listHTML.style.display = "none";
+            this.files_metadataHTML.style.display = "none";
+            this.filesTilesElement.style.display = "flex";
+            if (this.currentFolder instanceof HTMLElement) {
+                this.updateFileList(this.currentFolder, true);
+            }
+            this.updateListDisplayIcon();
+            this.updateTilesDisplayIcon();
+        }
+    }
     updateBackArrow() {
         if (this.lastFolders.length > 0 && !this.arrowsState.back_arrow) {
             this.arrowsState.back_arrow = true;
@@ -1019,7 +1279,6 @@ class FileManager {
         this.navigationPanel.style.display = "none";
         this.FileManagerStyles.fmAddClass(this.uploadFilesPanel, "fm_hidden");
         let message_submitHTML = this.filemanager_root.querySelector(".fm_message_submit");
-        console.log(message_submitHTML);
         if (message_submitHTML instanceof HTMLElement) {
             message_submitHTML.textContent = "Success";
             setTimeout(() => {
@@ -1370,11 +1629,20 @@ class FileManager {
             if (this.currentFile instanceof HTMLElement) {
                 const originalTextElem = (_a = this.currentFile) === null || _a === void 0 ? void 0 : _a.querySelector(".fm_file_name");
                 if (originalTextElem instanceof HTMLElement && originalTextElem.textContent) {
-                    const inputElement = document.createElement('input');
-                    inputElement.type = 'text';
+                    // debugger;
+                    const inputElement = document.createElement('textarea');
+                    // inputElement.type = 'text';
                     inputElement.value = originalTextElem.textContent;
                     inputElement.classList.add("fm_file_name");
-                    this.FileManagerStyles.fmAddClass(inputElement, "fm_file_name");
+                    inputElement.style.height = String(originalTextElem.offsetHeight) + "px";
+                    inputElement.style.width = String(originalTextElem.offsetWidth) + "px";
+                    inputElement.style.resize = "None";
+                    if (this.filesDisplayMode === "tiles") {
+                        this.FileManagerStyles.fmAddClass(inputElement, "fm_file_name_tiles");
+                    }
+                    else {
+                        this.FileManagerStyles.fmAddClass(inputElement, "fm_file_name");
+                    }
                     this.currentFile.replaceChild(inputElement, originalTextElem);
                     inputElement.focus();
                     let bufferThis = this;
@@ -1384,8 +1652,13 @@ class FileManager {
                             newTextElement.textContent = inputElement.value;
                             newTextElement.classList.add("fm_file_name");
                             newTextElement.classList.add("fm_file_metadata");
-                            bufferThis.FileManagerStyles.fmAddClass(newTextElement, "fm_file_name");
                             bufferThis.FileManagerStyles.fmAddClass(newTextElement, "fm_file_metadata");
+                            if (bufferThis.filesDisplayMode === "tiles") {
+                                bufferThis.FileManagerStyles.fmAddClass(newTextElement, "fm_file_name_tiles");
+                            }
+                            else {
+                                bufferThis.FileManagerStyles.fmAddClass(newTextElement, "fm_file_name");
+                            }
                             if (bufferThis.currentFile instanceof HTMLElement) {
                                 bufferThis.currentFile.replaceChild(newTextElement, inputElement);
                                 if (originalTextElem.textContent === inputElement.value) {
@@ -1561,23 +1834,52 @@ class FileManager {
             }
         });
     }
+    startLoading() {
+        this.loaderElem.style.display = "flex";
+        this.filesTilesElement.style.display = "none";
+        this.files_listHTML.style.display = "none";
+        this.files_metadataHTML.style.display = "none";
+    }
+    endLoading() {
+        this.loaderElem.style.display = "none";
+        if (this.filesDisplayMode === "list") {
+            this.files_listHTML.style.display = "block";
+            this.files_metadataHTML.style.display = "flex";
+        }
+        else if (this.filesDisplayMode === "tiles") {
+            this.filesTilesElement.style.display = "flex";
+        }
+    }
     getInternalFiles(path) {
         return __awaiter(this, void 0, void 0, function* () {
             let files;
+            this.startLoading();
             try {
                 files = yield this.FileManagerServer.getFiles(path);
             }
             catch (error) {
                 throw error;
             }
+            this.endLoading();
             if (files != null && this.files_listHTML) {
-                this.files_listHTML.innerHTML = "";
-                files.forEach(file => {
-                    let file_block = this.createHTMLFileList(file);
-                    if (file.isFolder) {
-                        file_block.addEventListener("dblclick", this.handleOpenFileListFolder.bind(this));
-                    }
-                });
+                if (this.filesDisplayMode === "list") {
+                    this.files_listHTML.innerHTML = "";
+                    files.forEach(file => {
+                        let file_block = this.createHTMLFileList(file);
+                        if (file.isFolder) {
+                            file_block.addEventListener("dblclick", this.handleOpenFileListFolder.bind(this));
+                        }
+                    });
+                }
+                else if (this.filesDisplayMode === "tiles") {
+                    this.filesTilesElement.innerHTML = "";
+                    files.forEach(file => {
+                        let file_block = this.createHTMLFileTiles(file);
+                        if (file.isFolder) {
+                            file_block.addEventListener("dblclick", this.handleOpenFileListFolder.bind(this));
+                        }
+                    });
+                }
             }
         });
     }
@@ -1778,20 +2080,22 @@ class FileManager {
         let grid_wrapperHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(grid_wrapperHTML, "fm_grid_wrapper");
         grid_wrapperHTML.classList.add("fm_grid_wrapper");
-        let tableHTML = document.createElement("img");
-        tableHTML.src = "icons/table.png";
-        this.FileManagerStyles.fmAddClass(tableHTML, "fm_tool");
-        this.FileManagerStyles.fmAddClass(tableHTML, "fm_table");
-        tableHTML.classList.add("fm_tool");
-        tableHTML.classList.add("fm_table");
-        let gridHTML = document.createElement("img");
-        gridHTML.src = "icons/grid.png";
-        this.FileManagerStyles.fmAddClass(gridHTML, "fm_tool");
-        this.FileManagerStyles.fmAddClass(gridHTML, "fm_grid");
-        gridHTML.classList.add("fm_tool");
-        gridHTML.classList.add("fm_grid");
-        grid_wrapperHTML.append(tableHTML);
-        grid_wrapperHTML.append(gridHTML);
+        let listHTML = document.createElement("img");
+        listHTML.src = "icons/table.png";
+        this.FileManagerStyles.fmAddClass(listHTML, "fm_tool");
+        this.FileManagerStyles.fmAddClass(listHTML, "fm_list");
+        listHTML.classList.add("fm_tool");
+        listHTML.classList.add("fm_list");
+        listHTML.addEventListener("click", this.handleListDisplayModeClick.bind(this));
+        let tilesHTML = document.createElement("img");
+        tilesHTML.src = "icons/grid.png";
+        this.FileManagerStyles.fmAddClass(tilesHTML, "fm_tool");
+        this.FileManagerStyles.fmAddClass(tilesHTML, "fm_tiles");
+        tilesHTML.classList.add("fm_tool");
+        tilesHTML.classList.add("fm_tiles");
+        tilesHTML.addEventListener("click", this.handleTilesDisplayModeClick.bind(this));
+        grid_wrapperHTML.append(listHTML);
+        grid_wrapperHTML.append(tilesHTML);
         let settingsHTML = document.createElement("img");
         settingsHTML.src = "icons/gear.png";
         this.FileManagerStyles.fmAddClass(settingsHTML, "fm_tool");
@@ -1831,13 +2135,34 @@ class FileManager {
         this.FileManagerStyles.fmAddClass(files_panelHTML, "fm_files_panel");
         files_panelHTML.classList.add("fm_files_panel");
         this.FileManagerStyles.updatableElements["fm_files_panel"] = [files_panelHTML];
+        let files_tilesHTML = document.createElement("div");
+        this.FileManagerStyles.fmAddClass(files_tilesHTML, "fm_files_tiles");
+        files_tilesHTML.classList.add("fm_files_tiles");
+        if (this.filesDisplayMode === "tiles") {
+            files_tilesHTML.style.display = "flex";
+        }
+        else {
+            files_tilesHTML.style.display = "none";
+        }
         let metadata_blockHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(metadata_blockHTML, "fm_metadata_block");
         metadata_blockHTML.classList.add("fm_metadata_block");
         this.FileManagerStyles.updatableElements["fm_metadata_block"] = [metadata_blockHTML];
-        this.files_listHTML = document.createElement("div");
-        this.FileManagerStyles.fmAddClass(this.files_listHTML, "fm_files_list");
-        this.files_listHTML.classList.add("fm_files_list");
+        if (this.filesDisplayMode === "tiles") {
+            metadata_blockHTML.style.display = "none";
+        }
+        else {
+            metadata_blockHTML.style.display = "flex";
+        }
+        let files_listHTML = document.createElement("div");
+        this.FileManagerStyles.fmAddClass(files_listHTML, "fm_files_list");
+        files_listHTML.classList.add("fm_files_list");
+        if (this.filesDisplayMode === "list") {
+            files_listHTML.style.display = "block";
+        }
+        else {
+            files_listHTML.style.display = "none";
+        }
         let metadata_nameHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(metadata_nameHTML, "fm_metadata_name");
         this.FileManagerStyles.fmAddClass(metadata_nameHTML, "fm_metadata");
@@ -1866,8 +2191,19 @@ class FileManager {
         metadata_blockHTML.append(metadata_changedateHTML);
         metadata_blockHTML.append(metadata_typeHTML);
         metadata_blockHTML.append(metadata_sizeHTML);
+        let loaderWrapperHTML = document.createElement("div");
+        loaderWrapperHTML.classList.add("fm_loader_wrapper");
+        this.FileManagerStyles.fmAddClass(loaderWrapperHTML, "fm_loader_wrapper");
+        loaderWrapperHTML.style.display = "none";
+        let loaderHTML = document.createElement("span");
+        loaderHTML.classList.add("fm_loader");
+        this.FileManagerStyles.fmAddClass(loaderHTML, "fm_loader");
+        this.FileManagerStyles.addRotationAnimation(loaderHTML);
+        loaderWrapperHTML.append(loaderHTML);
         files_panelHTML.append(metadata_blockHTML);
-        files_panelHTML.append(this.files_listHTML);
+        files_panelHTML.append(files_listHTML);
+        files_panelHTML.append(files_tilesHTML);
+        files_panelHTML.append(loaderWrapperHTML);
         filemanager_mainHTML.append(files_panelHTML);
         filemanager_super_root.append(filemanager_mainHTML);
         // Creating settings panel
