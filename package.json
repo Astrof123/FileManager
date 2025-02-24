@@ -2,9 +2,9 @@
   "name": "filemanager-vanilla",
   "version": "2.0.0",
   "description": "Vanilla Javascript file manager",
-  "main": "dist/filemanager.bundle.js",
+  "main": "dist/filemanager.bundle.mjs",
   "module": "src/filemanager.js",
-  "browser": "dist/filemanager.bundle.js",
+  "browser": "dist/filemanager.bundle.mjs",
   "scripts": {
     "build": "webpack"
   },
@@ -17,5 +17,9 @@
   "devDependencies": {
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./dist/filemanager.bundle.mjs"
   }
 }

@@ -1,12 +1,21 @@
-const path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export default {
   entry: './src/filemanager.js',
   output: {
-    filename: 'filemanager.bundle.js',
+    filename: 'filemanager.bundle.mjs',
     path: path.resolve(__dirname, 'dist'),
-    library: 'Filemanager', // важно для использования в браузере
-    libraryTarget: 'umd',         // универсальный формат модуля
+    environment: {
+      module: true,
+    },
+    libraryTarget: 'module',
   },
-  mode: 'development', // для продакшена, 'development' для разработки
+  experiments: {
+    outputModule: true,
+  },
+  mode: 'development',
 };
