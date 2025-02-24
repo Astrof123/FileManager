@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-class FileManagerStyles {
+export class FileManagerStyles {
     constructor() {
         this.updatableElements = {};
         this.fileManagerMutableStyles = {
@@ -19,6 +19,12 @@ class FileManagerStyles {
                 selected: "#4a4a4a",
                 text_color: "#ffffff"
             },
+            "sizing": {
+                tools: "medium",
+                navigation: "medium",
+                folders_panel: "medium",
+                files_panel: "medium",
+            }
         };
         this.fileManagerHeaderStyles = {};
         this.fileManagerStyles = {};
@@ -41,14 +47,16 @@ class FileManagerStyles {
             "fm_super_root": {
                 "box-sizing": 'border-box',
                 fontFamily: '"Roboto", sans-serif',
-                width: '800px',
-                height: "600px",
+                width: '100%',
+                height: "100%",
+                "min-height": "300px",
+                "min-width": "550px",
                 display: "flex",
                 "flex-direction": "column",
             },
             "fm_folders_nav": {
                 width: '220px',
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                border: this.settingSizing([3], "folders_panel") + ` solid ${this.fileManagerMutableStyles.colors.border}`,
                 "border-radius": '4px',
                 "background-color": this.fileManagerMutableStyles.colors.main_background,
                 color: '#e3e3e3',
@@ -58,13 +66,14 @@ class FileManagerStyles {
                 scrollbarColor: `#888 ${this.fileManagerMutableStyles.colors.border}`,
                 display: "flex",
                 "box-sizing": "border-box",
+                resize: "horizontal",
             },
             "fm_folder_icon": {
-                width: '22px',
-                marginRight: '8px',
+                width: this.settingSizing([22], "folders_panel"),
+                marginRight: this.settingSizing([8], "folders_panel"),
             },
             "fm_folder_name": {
-                fontSize: '14px',
+                fontSize: this.settingSizing([14], "folders_panel"),
                 color: this.fileManagerMutableStyles.colors.text_color,
                 "text-overflow": "ellipsis",
                 "width": "90%",
@@ -85,8 +94,8 @@ class FileManagerStyles {
                 "overflow": "hidden",
             },
             "fm_folder_open_icon_wrapper": {
-                paddingLeft: '4px',
-                paddingRight: '8px',
+                paddingLeft: this.settingSizing([4], "folders_panel"),
+                paddingRight: this.settingSizing([8], "folders_panel"),
             },
             "fm_folder_parent__opened": {
                 "background-color": this.fileManagerMutableStyles.colors.selected,
@@ -95,11 +104,11 @@ class FileManagerStyles {
                 "background-color": this.fileManagerMutableStyles.colors.selected,
             },
             "fm_folder_open_icon": {
-                width: '10px',
+                width: this.settingSizing([10], "folders_panel"),
             },
             "fm_folder_wrapper": {
                 position: 'relative',
-                left: '24px',
+                left: this.settingSizing([24], "folders_panel"),
                 userSelect: 'none',
                 "box-sizing": "border-box",
                 "min-width": '100%',
@@ -109,7 +118,7 @@ class FileManagerStyles {
                 position: 'static',
             },
             "fm_files_panel": {
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                border: this.settingSizing([3], "files_panel") + ` solid ${this.fileManagerMutableStyles.colors.border}`,
                 "background-color": this.fileManagerMutableStyles.colors.main_background,
                 color: '#e3e3e3',
                 width: '80%',
@@ -126,24 +135,24 @@ class FileManagerStyles {
                 "background-color": this.fileManagerMutableStyles.colors.main_background,
                 "border-radius": '0px 0px 4px 4px',
                 height: "85%",
-                "box-sizing": "border-box"
+                "box-sizing": "border-box",
+                resize: "horizontal"
             },
             "fm_metadata_block": {
-                display: 'flex',
                 flexDirection: 'row',
-                borderBottom: `2px solid ${this.fileManagerMutableStyles.colors.border}`,
-                padding: '8px',
-                fontSize: '12px',
-                paddingLeft: '12px',
+                borderBottom: this.settingSizing([3], "files_panel") + ` solid ${this.fileManagerMutableStyles.colors.border}`,
+                padding: this.settingSizing([8], "files_panel"),
+                fontSize: this.settingSizing([12], "files_panel"),
+                paddingLeft: this.settingSizing([12], "files_panel"),
             },
             "fm_metadata": {
                 userSelect: 'none',
             },
             "fm_metadata_name": {
-                width: '40%',
+                width: '37%',
             },
             "fm_metadata_changedate": {
-                width: '32%',
+                width: '34%',
             },
             "fm_file_changedate": {
                 width: '32%',
@@ -168,19 +177,22 @@ class FileManagerStyles {
                 userSelect: 'none',
                 color: this.fileManagerMutableStyles.colors.text_color,
                 "margin-right": '2%',
+                "font-size": this.settingSizing([16], "files_panel"),
+                "white-space": "nowrap",
                 "text-overflow": "ellipsis",
+                "overflow": "hidden"
             },
             "fm_file_block": {
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                borderBottom: `2px solid ${this.fileManagerMutableStyles.colors.border}`,
-                padding: '8px 0px',
-                paddingLeft: '12px',
+                borderBottom: this.settingSizing([2], "files_panel") + ` solid ${this.fileManagerMutableStyles.colors.border}`,
+                padding: this.settingSizing([8, 0], "files_panel"),
+                paddingLeft: this.settingSizing([12], "files_panel"),
                 cursor: 'pointer',
             },
             "fm_file_icon": {
-                width: '22px',
+                width: this.settingSizing([22], "files_panel"),
                 marginRight: '2%',
                 userSelect: 'none',
             },
@@ -198,7 +210,6 @@ class FileManagerStyles {
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                height: '50px',
                 "box-sizing": 'border-box',
             },
             "fm_filemanager_navigation": {
@@ -210,44 +221,44 @@ class FileManagerStyles {
                 flexDirection: 'row',
             },
             "fm_filemanager_arrow": {
-                width: '16px',
+                width: this.settingSizing([16], "navigation"),
                 display: 'block',
                 userSelect: 'none',
             },
             "fm_arrows_block": {
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                border: this.settingSizing([3], 'navigation') + ` solid ${this.fileManagerMutableStyles.colors.border}`,
                 display: 'flex',
                 "border-radius": '4px',
             },
             "fm_arrow_wrapper": {
-                padding: '8px 12px',
+                padding: this.settingSizing([8, 12], "navigation"),
                 "border-radius": '4px',
                 cursor: 'pointer',
             },
             "fm_add_file_button": {
                 color: this.fileManagerMutableStyles.colors.text_color,
                 "background-color": this.fileManagerMutableStyles.colors.main_background,
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                border: this.settingSizing([3], 'tools') + ` solid ${this.fileManagerMutableStyles.colors.border}`,
                 borderTop: 'none',
                 borderBottom: 'none',
-                padding: '8px 12px',
+                padding: this.settingSizing([8, 12], 'tools'),
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: this.settingSizing([8], 'tools'),
                 cursor: 'pointer',
-                fontSize: '13px',
+                fontSize: this.settingSizing([13], 'tools'),
                 fontWeight: '500',
                 height: '100%',
                 "user-select": "none"
             },
             "fm_add_file_icon": {
-                width: '24px',
+                width: this.settingSizing([24], 'tools'),
             },
             "fm_tool": {
-                width: '35px',
-                height: '35px',
-                padding: '8px',
-                margin: '0px 8px',
+                width: this.settingSizing([35], 'tools'),
+                height: this.settingSizing([35], 'tools'),
+                padding: this.settingSizing([8], 'tools'),
+                margin: this.settingSizing([0, 8], 'tools'),
                 cursor: 'pointer',
                 display: 'block',
                 userSelect: 'none',
@@ -273,6 +284,7 @@ class FileManagerStyles {
             "fm_path_folder": {
                 color: this.fileManagerMutableStyles.colors.text_color,
                 userSelect: 'none',
+                "font-size": this.settingSizing([16], "navigation"),
             },
             "fm_search": {
                 border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
@@ -281,6 +293,7 @@ class FileManagerStyles {
                 padding: '0px 8px',
                 color: '#ffff',
                 width: '20%',
+                "font-size": this.settingSizing([14], "navigation"),
             },
             "fm_grid_wrapper": {
                 display: 'flex',
@@ -294,11 +307,11 @@ class FileManagerStyles {
                 display: 'flex',
                 flexDirection: 'column',
                 "background-color": this.fileManagerMutableStyles.colors.hover,
-                width: '143px',
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                width: this.settingSizing([143], "tools"),
+                border: this.settingSizing([3], "tools") + ` solid ${this.fileManagerMutableStyles.colors.border}`,
                 borderTop: 'none',
                 position: 'absolute',
-                bottom: '-84px',
+                bottom: this.settingSizing([-84], "tools"),
                 zIndex: '10',
                 cursor: 'pointer',
                 "box-sizing": 'border-box',
@@ -306,8 +319,8 @@ class FileManagerStyles {
             "fm_upload_files_func_wrapper": {
                 display: 'flex',
                 flexDirection: 'row',
-                padding: '8px',
-                gap: '8px',
+                padding: this.settingSizing([8], "tools"),
+                gap: this.settingSizing([8], "tools"),
                 alignItems: 'center',
                 width: '100%',
                 userSelect: 'none',
@@ -315,11 +328,11 @@ class FileManagerStyles {
                 position: 'relative',
             },
             "fm_upload_files_func_icon": {
-                width: '24px',
+                width: this.settingSizing([24], "tools"),
             },
             "fm_upload_files_func_name": {
                 color: this.fileManagerMutableStyles.colors.text_color,
-                fontSize: '13px',
+                fontSize: this.settingSizing([13], "tools"),
                 fontWeight: '500',
             },
             "fm_hidden": {
@@ -352,13 +365,22 @@ class FileManagerStyles {
                 "box-sizing": "border-box",
                 "border-radius": "4px"
             },
-            "fm_leave_settings_arrow": {},
+            "fm_leave_settings_arrow": {
+                width: "35px",
+                height: "35px",
+                padding: "8px",
+                cursor: 'pointer',
+                display: 'block',
+                userSelect: 'none',
+                "box-sizing": 'border-box'
+            },
             "fm_params_panel": {
                 display: "flex",
                 "flex-direction": "row",
                 padding: "16px 8px",
                 "flex-wrap": "wrap",
                 gap: "12px",
+                overflow: "auto"
             },
             "fm_color_label": {
                 color: this.fileManagerMutableStyles.colors.text_color,
@@ -421,13 +443,13 @@ class FileManagerStyles {
                 color: "#a7d649"
             },
             "fm_files_tiles": {
-                display: "flex",
+                // display: "flex",
                 "flex-wrap": "wrap",
                 "flex-direction": "row",
                 // "justify-content": "center",
-                "row-gap": "8px",
+                "row-gap": this.settingSizing([8], "files_panel"),
                 "column-gap": "1%",
-                padding: "12px",
+                padding: this.settingSizing([12], "files_panel"),
                 "box-sizing": "border-box",
                 "height": "100%",
                 "align-content": "flex-start",
@@ -437,35 +459,36 @@ class FileManagerStyles {
                 "border-radius": "4px"
             },
             "fm_file_block_tiles": {
-                width: "90px",
+                width: this.settingSizing([90], "files_panel"),
                 display: 'flex',
                 "flex-direction": 'column',
                 "align-items": 'center',
                 "justify-content": "space-beetwen",
-                gap: "8px",
-                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
-                padding: '6px',
+                gap: this.settingSizing([8], "files_panel"),
+                border: this.settingSizing([3], "files_panel") + ` solid ${this.fileManagerMutableStyles.colors.border}`,
+                padding: this.settingSizing([6], "files_panel"),
                 cursor: 'pointer',
                 "box-sizing": "border-box",
                 "border-radius": "6px",
                 "overflow": "hidden",
-                height: "25%",
+                height: this.settingSizing([104], "files_panel"),
                 // "justify-content": "center",
             },
             "fm_file_name_tiles": {
                 // width: '80px',
                 "box-sizing": "border-box",
-                "font-size": "14px",
+                "font-size": this.settingSizing([13], "files_panel"),
                 "text-align": "center",
-                // "overflow": "hidden",
+                "overflow": "hidden",
                 "word-break": "break-all",
-                "max-height": "90%",
                 "display": "flex",
                 "text-overflow": "ellipsis",
+                "font-weight": "500",
+                "user-select": "none"
             },
             "fm_file_icon_tiles": {
-                "max-width": '62px',
-                "max-height": "41px",
+                "max-width": this.settingSizing([62], "files_panel"),
+                "max-height": this.settingSizing([41], "files_panel"),
                 "user-select": 'none',
             },
             "fm_loader": {
@@ -484,6 +507,16 @@ class FileManagerStyles {
                 height: "100%",
                 "align-items": "center",
                 "justify-content": "center",
+            },
+            "fm_select_input": {
+                width: "75px",
+                height: "22px",
+                "border-radius": "4px"
+            },
+            "fm_file_name_wrapper": {
+                "max-height": '100%',
+                "box-sizing": 'border-box',
+                "overflow": "hidden",
             }
         };
     }
@@ -493,10 +526,10 @@ class FileManagerStyles {
                 "background-color": this.fileManagerMutableStyles.colors.hover,
             },
             'fm_folders_nav::-webkit-scrollbar': {
-                width: '10px',
+                width: this.settingSizing([10], "folders_panel"),
             },
             'fm_files_panel::-webkit-scrollbar': {
-                width: '10px',
+                width: this.settingSizing([10], "files_panel"),
             },
             'fm_folders_nav::-webkit-scrollbar-track': {
                 "background-color": this.fileManagerMutableStyles.colors.border,
@@ -519,7 +552,11 @@ class FileManagerStyles {
             "fm_add_file_button:hover": {
                 "background-color": this.fileManagerMutableStyles.colors.hover,
             },
-            "fm_tool:hover": {
+            "fm_tool:hover, fm_leave_settings_arrow:hover": {
+                "background-color": this.fileManagerMutableStyles.colors.hover,
+                "border-radius": '4px',
+            },
+            "fm_leave_settings_arrow:hover": {
                 "background-color": this.fileManagerMutableStyles.colors.hover,
                 "border-radius": '4px',
             },
@@ -570,6 +607,29 @@ class FileManagerStyles {
             }
         }
     }
+    settingSizing(settings, panel) {
+        let final_settings = "";
+        let multy = 1;
+        if (this.fileManagerMutableStyles.sizing[panel] === "xsmall") {
+            multy = 0.75;
+        }
+        else if (this.fileManagerMutableStyles.sizing[panel] === "small") {
+            multy = 0.9;
+        }
+        else if (this.fileManagerMutableStyles.sizing[panel] === "medium") {
+            multy = 1;
+        }
+        else if (this.fileManagerMutableStyles.sizing[panel] === "large") {
+            multy = 1.2;
+        }
+        else if (this.fileManagerMutableStyles.sizing[panel] === "xlarge") {
+            multy = 1.4;
+        }
+        for (let i = 0; i < settings.length; i++) {
+            final_settings += String(settings[i] * multy) + "px ";
+        }
+        return final_settings.trim();
+    }
     updateHeaderStyles() {
         this.headerStyleElement.textContent = `
             .fm_loader::after {
@@ -618,6 +678,12 @@ class FileManagerStyles {
                 selected: "#4a4a4a",
                 text_color: "#ffffff"
             },
+            "sizing": {
+                tools: "medium",
+                navigation: "medium",
+                folders_panel: "medium",
+                files_panel: "medium",
+            }
         };
         localStorage.fmDefaultMutableStyles = JSON.stringify(defaultMutableStyles);
     }
@@ -633,9 +699,19 @@ class FileManagerStyles {
     }
 }
 
-class FileManagerServer {
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+export class FileManagerServer {
 }
-class FileManager {
+export class FileManager {
     constructor(root, FileManagerServer, rootFolderName = 'Root') {
         this.image_extension = ['png', 'jpg', 'jpeg', 'webp'];
         this.FileManagerStyles = new FileManagerStyles();
@@ -823,6 +899,12 @@ class FileManager {
         let file_iconHTML = document.createElement("img");
         file_iconHTML.classList.add("fm_file_icon");
         this.FileManagerStyles.fmAddClass(file_iconHTML, "fm_file_icon");
+        if (this.FileManagerStyles.updatableElements["fm_file_icon"]) {
+            this.FileManagerStyles.updatableElements["fm_file_icon"].push(file_iconHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_file_icon"] = [file_iconHTML];
+        }
         let file_typeHTML = document.createElement("span");
         file_typeHTML.classList.add("fm_file_type");
         file_typeHTML.classList.add("fm_file_metadata");
@@ -911,6 +993,12 @@ class FileManager {
         let file_iconHTML = document.createElement("img");
         file_iconHTML.classList.add("fm_file_icon");
         this.FileManagerStyles.fmAddClass(file_iconHTML, "fm_file_icon_tiles");
+        if (this.FileManagerStyles.updatableElements["fm_file_icon_tiles"]) {
+            this.FileManagerStyles.updatableElements["fm_file_icon_tiles"].push(file_iconHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_file_icon_tiles"] = [file_iconHTML];
+        }
         if (file.isFolder) {
             file_iconHTML.src = "icons/folder.png";
         }
@@ -932,13 +1020,12 @@ class FileManager {
         file_nameHTML.classList.add("fm_file_name");
         file_nameHTML.classList.add("fm_file_metadata");
         this.FileManagerStyles.fmAddClass(file_nameHTML, "fm_file_name_tiles");
-        this.FileManagerStyles.fmAddClass(file_nameHTML, "fm_file_metadata");
         file_nameHTML.textContent = file.name;
-        if (this.FileManagerStyles.updatableElements["fm_file_metadata"]) {
-            this.FileManagerStyles.updatableElements["fm_file_metadata"].push(file_nameHTML);
+        if (this.FileManagerStyles.updatableElements["fm_file_name_tiles"]) {
+            this.FileManagerStyles.updatableElements["fm_file_name_tiles"].push(file_nameHTML);
         }
         else {
-            this.FileManagerStyles.updatableElements["fm_file_metadata"] = [file_nameHTML];
+            this.FileManagerStyles.updatableElements["fm_file_name_tiles"] = [file_nameHTML];
         }
         file_blockHTML.append(file_iconHTML);
         file_blockHTML.append(file_nameHTML);
@@ -954,6 +1041,12 @@ class FileManager {
         let folder_wrapperHTML = document.createElement("div");
         folder_wrapperHTML.classList.add("fm_folder_wrapper");
         this.FileManagerStyles.fmAddClass(folder_wrapperHTML, "fm_folder_wrapper");
+        if (this.FileManagerStyles.updatableElements["fm_folder_wrapper"]) {
+            this.FileManagerStyles.updatableElements["fm_folder_wrapper"].push(folder_wrapperHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_folder_wrapper"] = [folder_wrapperHTML];
+        }
         let folder_childrenHTML = document.createElement("div");
         folder_childrenHTML.classList.add("fm_folder_children");
         this.FileManagerStyles.fmAddClass(folder_childrenHTML, "fm_folder_children");
@@ -963,14 +1056,32 @@ class FileManager {
         let folder_open_icon_wrapperHTML = document.createElement("div");
         folder_open_icon_wrapperHTML.classList.add("fm_folder_open_icon_wrapper");
         this.FileManagerStyles.fmAddClass(folder_open_icon_wrapperHTML, "fm_folder_open_icon_wrapper");
+        if (this.FileManagerStyles.updatableElements["fm_folder_open_icon_wrapper"]) {
+            this.FileManagerStyles.updatableElements["fm_folder_open_icon_wrapper"].push(folder_open_icon_wrapperHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_folder_open_icon_wrapper"] = [folder_open_icon_wrapperHTML];
+        }
         let folder_open_iconHTML = document.createElement("img");
         folder_open_iconHTML.classList.add("fm_folder_open_icon");
         this.FileManagerStyles.fmAddClass(folder_open_iconHTML, "fm_folder_open_icon");
         folder_open_iconHTML.src = "icons/arrow-point-to-right.png";
+        if (this.FileManagerStyles.updatableElements["fm_folder_open_icon"]) {
+            this.FileManagerStyles.updatableElements["fm_folder_open_icon"].push(folder_open_iconHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_folder_open_icon"] = [folder_open_iconHTML];
+        }
         let folder_iconHTML = document.createElement("img");
         folder_iconHTML.classList.add("fm_folder_icon");
         this.FileManagerStyles.fmAddClass(folder_iconHTML, "fm_folder_icon");
         folder_iconHTML.src = "icons/folder.png";
+        if (this.FileManagerStyles.updatableElements["fm_folder_icon"]) {
+            this.FileManagerStyles.updatableElements["fm_folder_icon"].push(folder_iconHTML);
+        }
+        else {
+            this.FileManagerStyles.updatableElements["fm_folder_icon"] = [folder_iconHTML];
+        }
         let folder_nameHTML = document.createElement("span");
         folder_nameHTML.classList.add("fm_folder_name");
         this.FileManagerStyles.fmAddClass(folder_nameHTML, "fm_folder_name");
@@ -1266,6 +1377,13 @@ class FileManager {
                 main_background: this.settingsForm.background_color.value,
                 selected: this.settingsForm.select_color.value,
                 text_color: this.settingsForm.text_color.value
+            },
+            "sizing": {
+                tools: this.settingsForm.tools.value,
+                navigation: this.settingsForm.navigation.value,
+                files_panel: this.settingsForm.files_panel.value,
+                folders_panel: this.settingsForm.folders_panel.value,
+                settings_panel: this.settingsForm.folders_panel.value,
             }
         };
         this.FileManagerStyles.setMutableStyles(newMutableStyles);
@@ -1630,12 +1748,12 @@ class FileManager {
                 const originalTextElem = (_a = this.currentFile) === null || _a === void 0 ? void 0 : _a.querySelector(".fm_file_name");
                 if (originalTextElem instanceof HTMLElement && originalTextElem.textContent) {
                     // debugger;
-                    const inputElement = document.createElement('textarea');
+                    const inputElement = document.createElement('input');
                     // inputElement.type = 'text';
                     inputElement.value = originalTextElem.textContent;
                     inputElement.classList.add("fm_file_name");
-                    inputElement.style.height = String(originalTextElem.offsetHeight) + "px";
-                    inputElement.style.width = String(originalTextElem.offsetWidth) + "px";
+                    inputElement.style.height = "80%";
+                    inputElement.style.width = "80%";
                     inputElement.style.resize = "None";
                     if (this.filesDisplayMode === "tiles") {
                         this.FileManagerStyles.fmAddClass(inputElement, "fm_file_name_tiles");
@@ -1893,6 +2011,7 @@ class FileManager {
         let filemanager_super_root = document.createElement("div");
         this.FileManagerStyles.fmAddClass(filemanager_super_root, "fm_super_root");
         filemanager_super_root.classList.add("fm_super_root");
+        this.FileManagerStyles.updatableElements["fm_super_root"] = [filemanager_super_root];
         let filemanager_navigationHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(filemanager_navigationHTML, "fm_filemanager_navigation");
         filemanager_navigationHTML.classList.add("fm_filemanager_navigation");
@@ -1917,6 +2036,7 @@ class FileManager {
         arrow_backHTML.classList.add("fm_arrow_wrapper");
         arrow_backHTML.classList.add("fm_arrow_back");
         arrow_backHTML.addEventListener('click', this.handleBackArrowClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_arrow_wrapper"] = [arrow_backHTML];
         let arrow_upHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(arrow_upHTML, "fm_arrow_wrapper");
         this.FileManagerStyles.fmAddClass(arrow_upHTML, "fm_arrow_up");
@@ -1926,24 +2046,29 @@ class FileManager {
         arrow_upHTML.classList.add("fm_disabled");
         arrow_upHTML.style.pointerEvents = 'none';
         arrow_upHTML.addEventListener('click', this.handleUpArrowClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_arrow_wrapper"].push(arrow_upHTML);
         let arrow_refreshHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(arrow_refreshHTML, "fm_arrow_wrapper");
         this.FileManagerStyles.fmAddClass(arrow_refreshHTML, "fm_arrow_refresh");
         arrow_refreshHTML.classList.add("fm_arrow_wrapper");
         arrow_refreshHTML.classList.add("fm_arrow_refresh");
         arrow_refreshHTML.addEventListener('click', this.handleRefreshClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_arrow_wrapper"].push(arrow_refreshHTML);
         let arrow_backIMG = document.createElement("img");
         this.FileManagerStyles.fmAddClass(arrow_backIMG, "fm_filemanager_arrow");
         arrow_backIMG.classList.add("fm_filemanager_arrow");
         arrow_backIMG.src = "/icons/next-left.png";
+        this.FileManagerStyles.updatableElements["fm_filemanager_arrow"] = [arrow_backIMG];
         let arrow_upIMG = document.createElement("img");
         this.FileManagerStyles.fmAddClass(arrow_upIMG, "fm_filemanager_arrow");
         arrow_upIMG.classList.add("fm_filemanager_arrow");
         arrow_upIMG.src = "/icons/next-upper.png";
+        this.FileManagerStyles.updatableElements["fm_filemanager_arrow"].push(arrow_upIMG);
         let arrow_refreshIMG = document.createElement("img");
         this.FileManagerStyles.fmAddClass(arrow_refreshIMG, "fm_filemanager_arrow");
         arrow_refreshIMG.classList.add("fm_filemanager_arrow");
         arrow_refreshIMG.src = "/icons/refresh.png";
+        this.FileManagerStyles.updatableElements["fm_filemanager_arrow"].push(arrow_refreshIMG);
         arrow_backHTML.append(arrow_backIMG);
         arrow_upHTML.append(arrow_upIMG);
         arrow_refreshHTML.append(arrow_refreshIMG);
@@ -1981,6 +2106,7 @@ class FileManager {
         this.FileManagerStyles.fmAddClass(add_file_iconHTML, "fm_add_file_icon");
         add_file_iconHTML.classList.add("fm_add_file_icon");
         add_file_buttonHTML.append(add_file_iconHTML);
+        this.FileManagerStyles.updatableElements["fm_add_file_icon"] = [add_file_iconHTML];
         let add_file_spanHTML = document.createElement("span");
         add_file_spanHTML.textContent = "Upload";
         add_file_buttonHTML.append(add_file_spanHTML);
@@ -1993,6 +2119,7 @@ class FileManager {
         let upload_files_wrapperHTML1 = document.createElement("div");
         this.FileManagerStyles.fmAddClass(upload_files_wrapperHTML1, "fm_upload_files_func_wrapper");
         upload_files_wrapperHTML1.classList.add("fm_upload_files_func_wrapper");
+        this.FileManagerStyles.updatableElements["fm_upload_files_func_wrapper"] = [upload_files_wrapperHTML1];
         let upload_file_imgHTML = document.createElement("img");
         upload_file_imgHTML.src = "icons/add_file.png";
         this.FileManagerStyles.fmAddClass(upload_file_imgHTML, "fm_upload_files_func_icon");
@@ -2000,6 +2127,7 @@ class FileManager {
         upload_file_imgHTML.classList.add("fm_upload_files_func_icon");
         upload_file_imgHTML.classList.add("fm_upload_file");
         upload_files_wrapperHTML1.append(upload_file_imgHTML);
+        this.FileManagerStyles.updatableElements["fm_upload_files_func_icon"] = [upload_file_imgHTML];
         let upload_file_spanHTML = document.createElement("span");
         upload_file_spanHTML.textContent = "Upload file";
         this.FileManagerStyles.fmAddClass(upload_file_spanHTML, "fm_upload_files_func_name");
@@ -2017,6 +2145,7 @@ class FileManager {
         let upload_files_wrapperHTML2 = document.createElement("div");
         this.FileManagerStyles.fmAddClass(upload_files_wrapperHTML2, "fm_upload_files_func_wrapper");
         upload_files_wrapperHTML2.classList.add("fm_upload_files_func_wrapper");
+        this.FileManagerStyles.updatableElements["fm_upload_files_func_wrapper"].push(upload_files_wrapperHTML2);
         let upload_file_imgHTML2 = document.createElement("img");
         upload_file_imgHTML2.src = "icons/add_folder.png";
         this.FileManagerStyles.fmAddClass(upload_file_imgHTML2, "fm_upload_files_func_icon");
@@ -2024,6 +2153,7 @@ class FileManager {
         upload_file_imgHTML2.classList.add("fm_upload_files_func_icon");
         upload_file_imgHTML2.classList.add("fm_upload_folder");
         upload_files_wrapperHTML2.append(upload_file_imgHTML2);
+        this.FileManagerStyles.updatableElements["fm_upload_files_func_icon"].push(upload_file_imgHTML2);
         let upload_file_spanHTML2 = document.createElement("span");
         upload_file_spanHTML2.textContent = "Upload folder";
         this.FileManagerStyles.fmAddClass(upload_file_spanHTML2, "fm_upload_files_func_name");
@@ -2049,6 +2179,7 @@ class FileManager {
         cutHTML.classList.add("fm_tool");
         cutHTML.classList.add("fm_cut");
         cutHTML.addEventListener("click", this.handleCutClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_tool"] = [cutHTML];
         let duplicateHTML = document.createElement("img");
         duplicateHTML.src = "icons/duplicate.png";
         this.FileManagerStyles.fmAddClass(duplicateHTML, "fm_tool");
@@ -2056,6 +2187,7 @@ class FileManager {
         duplicateHTML.classList.add("fm_tool");
         duplicateHTML.classList.add("fm_duplicate");
         duplicateHTML.addEventListener('click', this.handleDuplicateClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_tool"].push(duplicateHTML);
         let insertHTML = document.createElement("img");
         insertHTML.src = "icons/insert.png";
         this.FileManagerStyles.fmAddClass(insertHTML, "fm_tool");
@@ -2063,6 +2195,7 @@ class FileManager {
         insertHTML.classList.add("fm_tool");
         insertHTML.classList.add("fm_insert");
         insertHTML.addEventListener('click', this.handleInsertClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_tool"].push(insertHTML);
         let renameHTML = document.createElement("img");
         renameHTML.src = "icons/rename.png";
         this.FileManagerStyles.fmAddClass(renameHTML, "fm_tool");
@@ -2070,6 +2203,7 @@ class FileManager {
         renameHTML.classList.add("fm_tool");
         renameHTML.classList.add("fm_rename");
         renameHTML.addEventListener("click", this.handleRenameClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_tool"].push(renameHTML);
         let removeHTML = document.createElement("img");
         removeHTML.src = "icons/remove.png";
         this.FileManagerStyles.fmAddClass(removeHTML, "fm_tool");
@@ -2077,6 +2211,7 @@ class FileManager {
         removeHTML.classList.add("fm_tool");
         removeHTML.classList.add("fm_remove");
         removeHTML.addEventListener("click", this.handleRemoveClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_tool"].push(removeHTML);
         let grid_wrapperHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(grid_wrapperHTML, "fm_grid_wrapper");
         grid_wrapperHTML.classList.add("fm_grid_wrapper");
@@ -2087,6 +2222,7 @@ class FileManager {
         listHTML.classList.add("fm_tool");
         listHTML.classList.add("fm_list");
         listHTML.addEventListener("click", this.handleListDisplayModeClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_tool"].push(listHTML);
         let tilesHTML = document.createElement("img");
         tilesHTML.src = "icons/grid.png";
         this.FileManagerStyles.fmAddClass(tilesHTML, "fm_tool");
@@ -2094,6 +2230,7 @@ class FileManager {
         tilesHTML.classList.add("fm_tool");
         tilesHTML.classList.add("fm_tiles");
         tilesHTML.addEventListener("click", this.handleTilesDisplayModeClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_tool"].push(tilesHTML);
         grid_wrapperHTML.append(listHTML);
         grid_wrapperHTML.append(tilesHTML);
         let settingsHTML = document.createElement("img");
@@ -2103,6 +2240,7 @@ class FileManager {
         settingsHTML.classList.add("fm_tool");
         settingsHTML.classList.add("fm_settings");
         settingsHTML.addEventListener("click", this.handleSettingsClick.bind(this));
+        this.FileManagerStyles.updatableElements["fm_tool"].push(settingsHTML);
         filemanager_toolsHTML.append(add_file_buttonHTML);
         filemanager_toolsHTML.append(cutHTML);
         filemanager_toolsHTML.append(duplicateHTML);
@@ -2125,6 +2263,7 @@ class FileManager {
             if (rootfolder_wrapper) {
                 this.FileManagerStyles.fmAddClass(rootfolder_wrapper, "fm_folder_root_wrapper");
                 rootfolder_wrapper.classList.add("fm_folder_root_wrapper");
+                this.FileManagerStyles.updatableElements["fm_folder_root_wrapper"] = [rootfolder_wrapper];
             }
             rootfolder_icon_wrapper === null || rootfolder_icon_wrapper === void 0 ? void 0 : rootfolder_icon_wrapper.addEventListener("click", this.handleOpenNavFolder.bind(this));
             rootfolder_parent === null || rootfolder_parent === void 0 ? void 0 : rootfolder_parent.addEventListener("click", this.handleShowFileList.bind(this));
@@ -2138,6 +2277,7 @@ class FileManager {
         let files_tilesHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(files_tilesHTML, "fm_files_tiles");
         files_tilesHTML.classList.add("fm_files_tiles");
+        this.FileManagerStyles.updatableElements["fm_files_tiles"] = [files_tilesHTML];
         if (this.filesDisplayMode === "tiles") {
             files_tilesHTML.style.display = "flex";
         }
@@ -2157,6 +2297,7 @@ class FileManager {
         let files_listHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(files_listHTML, "fm_files_list");
         files_listHTML.classList.add("fm_files_list");
+        this.FileManagerStyles.updatableElements["fm_files_list"] = [files_listHTML];
         if (this.filesDisplayMode === "list") {
             files_listHTML.style.display = "block";
         }
@@ -2169,24 +2310,28 @@ class FileManager {
         metadata_nameHTML.classList.add("fm_metadata_name");
         metadata_nameHTML.classList.add("fm_metadata");
         metadata_nameHTML.textContent = "Name";
+        this.FileManagerStyles.updatableElements["fm_metadata"] = [metadata_nameHTML];
         let metadata_changedateHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(metadata_changedateHTML, "fm_metadata_changedate");
         this.FileManagerStyles.fmAddClass(metadata_changedateHTML, "fm_metadata");
         metadata_changedateHTML.classList.add("fm_metadata_changedate");
         metadata_changedateHTML.classList.add("fm_metadata");
         metadata_changedateHTML.textContent = "Date of change";
+        this.FileManagerStyles.updatableElements["fm_metadata"].push(metadata_changedateHTML);
         let metadata_typeHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(metadata_typeHTML, "fm_metadata_type");
         this.FileManagerStyles.fmAddClass(metadata_typeHTML, "fm_metadata");
         metadata_typeHTML.classList.add("fm_metadata_type");
         metadata_typeHTML.classList.add("fm_metadata");
         metadata_typeHTML.textContent = "Type";
+        this.FileManagerStyles.updatableElements["fm_metadata"].push(metadata_typeHTML);
         let metadata_sizeHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(metadata_sizeHTML, "fm_metadata_size");
         this.FileManagerStyles.fmAddClass(metadata_sizeHTML, "fm_metadata");
         metadata_sizeHTML.classList.add("fm_metadata_size");
         metadata_sizeHTML.classList.add("fm_metadata");
         metadata_sizeHTML.textContent = "Size";
+        this.FileManagerStyles.updatableElements["fm_metadata"].push(metadata_sizeHTML);
         metadata_blockHTML.append(metadata_nameHTML);
         metadata_blockHTML.append(metadata_changedateHTML);
         metadata_blockHTML.append(metadata_typeHTML);
@@ -2200,6 +2345,7 @@ class FileManager {
         this.FileManagerStyles.fmAddClass(loaderHTML, "fm_loader");
         this.FileManagerStyles.addRotationAnimation(loaderHTML);
         loaderWrapperHTML.append(loaderHTML);
+        this.FileManagerStyles.updatableElements["fm_loader"] = [loaderHTML];
         files_panelHTML.append(metadata_blockHTML);
         files_panelHTML.append(files_listHTML);
         files_panelHTML.append(files_tilesHTML);
@@ -2219,9 +2365,7 @@ class FileManager {
         title_blockHTML.textContent = "Settings";
         let leave_settings_arrowHTML = document.createElement("img");
         this.FileManagerStyles.fmAddClass(leave_settings_arrowHTML, "fm_leave_settings_arrow");
-        this.FileManagerStyles.fmAddClass(leave_settings_arrowHTML, "fm_tool");
         leave_settings_arrowHTML.classList.add("fm_leave_settings_arrow");
-        leave_settings_arrowHTML.classList.add("fm_tool");
         leave_settings_arrowHTML.style.margin = "0px";
         leave_settings_arrowHTML.src = "icons/next-left.png";
         leave_settings_arrowHTML.addEventListener("click", this.handleSettingsClick.bind(this));
@@ -2299,6 +2443,146 @@ class FileManager {
         this.FileManagerStyles.updatableElements["fm_color_label"].push(text_color_labelHTML);
         text_color_labelHTML.innerHTML = "Text color:<br>";
         text_color_labelHTML.append(text_colorHTML);
+        let navigation_sizeHTML = document.createElement("select");
+        this.FileManagerStyles.fmAddClass(navigation_sizeHTML, "fm_select_input");
+        navigation_sizeHTML.classList.add("fm_select_input");
+        navigation_sizeHTML.name = "navigation";
+        let navigation_xsmall_sizeHTML = document.createElement("option");
+        navigation_xsmall_sizeHTML.value = "xsmall";
+        navigation_xsmall_sizeHTML.textContent = "xsmall";
+        navigation_xsmall_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.navigation === "xsmall";
+        let navigation_small_sizeHTML = document.createElement("option");
+        navigation_small_sizeHTML.value = "small";
+        navigation_small_sizeHTML.textContent = "small";
+        navigation_small_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.navigation === "small";
+        let navigation_medium_sizeHTML = document.createElement("option");
+        navigation_medium_sizeHTML.value = "medium";
+        navigation_medium_sizeHTML.textContent = "medium";
+        navigation_medium_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.navigation === "medium";
+        let navigation_large_sizeHTML = document.createElement("option");
+        navigation_large_sizeHTML.value = "large";
+        navigation_large_sizeHTML.textContent = "large";
+        navigation_large_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.navigation === "large";
+        let navigation_xlarge_sizeHTML = document.createElement("option");
+        navigation_xlarge_sizeHTML.value = "xlarge";
+        navigation_xlarge_sizeHTML.textContent = "xlarge";
+        navigation_xlarge_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.navigation === "xlarge";
+        navigation_sizeHTML.append(navigation_xsmall_sizeHTML);
+        navigation_sizeHTML.append(navigation_small_sizeHTML);
+        navigation_sizeHTML.append(navigation_medium_sizeHTML);
+        navigation_sizeHTML.append(navigation_large_sizeHTML);
+        navigation_sizeHTML.append(navigation_xlarge_sizeHTML);
+        let navigation_size_labelHTML = document.createElement("label");
+        this.FileManagerStyles.fmAddClass(navigation_size_labelHTML, "fm_color_label");
+        navigation_size_labelHTML.classList.add("fm_color_label");
+        this.FileManagerStyles.updatableElements["fm_color_label"].push(navigation_size_labelHTML);
+        navigation_size_labelHTML.innerHTML = "Navigation interface:<br>";
+        navigation_size_labelHTML.append(navigation_sizeHTML);
+        let tools_sizeHTML = document.createElement("select");
+        this.FileManagerStyles.fmAddClass(tools_sizeHTML, "fm_select_input");
+        tools_sizeHTML.classList.add("fm_select_input");
+        tools_sizeHTML.name = "tools";
+        let tools_xsmall_sizeHTML = document.createElement("option");
+        tools_xsmall_sizeHTML.value = "xsmall";
+        tools_xsmall_sizeHTML.textContent = "xsmall";
+        tools_xsmall_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.tools === "xsmall";
+        let tools_small_sizeHTML = document.createElement("option");
+        tools_small_sizeHTML.value = "small";
+        tools_small_sizeHTML.textContent = "small";
+        tools_small_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.tools === "small";
+        let tools_medium_sizeHTML = document.createElement("option");
+        tools_medium_sizeHTML.value = "medium";
+        tools_medium_sizeHTML.textContent = "medium";
+        tools_medium_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.tools === "medium";
+        let tools_large_sizeHTML = document.createElement("option");
+        tools_large_sizeHTML.value = "large";
+        tools_large_sizeHTML.textContent = "large";
+        tools_large_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.tools === "large";
+        let tools_xlarge_sizeHTML = document.createElement("option");
+        tools_xlarge_sizeHTML.value = "xlarge";
+        tools_xlarge_sizeHTML.textContent = "xlarge";
+        tools_xlarge_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.tools === "xlarge";
+        tools_sizeHTML.append(tools_xsmall_sizeHTML);
+        tools_sizeHTML.append(tools_small_sizeHTML);
+        tools_sizeHTML.append(tools_medium_sizeHTML);
+        tools_sizeHTML.append(tools_large_sizeHTML);
+        tools_sizeHTML.append(tools_xlarge_sizeHTML);
+        let tools_size_labelHTML = document.createElement("label");
+        this.FileManagerStyles.fmAddClass(tools_size_labelHTML, "fm_color_label");
+        tools_size_labelHTML.classList.add("fm_color_label");
+        this.FileManagerStyles.updatableElements["fm_color_label"].push(tools_size_labelHTML);
+        tools_size_labelHTML.innerHTML = "Tools interface:<br>";
+        tools_size_labelHTML.append(tools_sizeHTML);
+        let folders_panel_sizeHTML = document.createElement("select");
+        this.FileManagerStyles.fmAddClass(folders_panel_sizeHTML, "fm_select_input");
+        folders_panel_sizeHTML.classList.add("fm_select_input");
+        folders_panel_sizeHTML.name = "folders_panel";
+        let folders_panel_xsmall_sizeHTML = document.createElement("option");
+        folders_panel_xsmall_sizeHTML.value = "xsmall";
+        folders_panel_xsmall_sizeHTML.textContent = "xsmall";
+        folders_panel_xsmall_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.folders_panel === "xsmall";
+        let folders_panel_small_sizeHTML = document.createElement("option");
+        folders_panel_small_sizeHTML.value = "small";
+        folders_panel_small_sizeHTML.textContent = "small";
+        folders_panel_small_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.folders_panel === "small";
+        let folders_panel_medium_sizeHTML = document.createElement("option");
+        folders_panel_medium_sizeHTML.value = "medium";
+        folders_panel_medium_sizeHTML.textContent = "medium";
+        folders_panel_medium_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.folders_panel === "medium";
+        let folders_panel_large_sizeHTML = document.createElement("option");
+        folders_panel_large_sizeHTML.value = "large";
+        folders_panel_large_sizeHTML.textContent = "large";
+        folders_panel_large_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.folders_panel === "large";
+        let folders_panel_xlarge_sizeHTML = document.createElement("option");
+        folders_panel_xlarge_sizeHTML.value = "xlarge";
+        folders_panel_xlarge_sizeHTML.textContent = "xlarge";
+        folders_panel_xlarge_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.folders_panel === "xlarge";
+        folders_panel_sizeHTML.append(folders_panel_xsmall_sizeHTML);
+        folders_panel_sizeHTML.append(folders_panel_small_sizeHTML);
+        folders_panel_sizeHTML.append(folders_panel_medium_sizeHTML);
+        folders_panel_sizeHTML.append(folders_panel_large_sizeHTML);
+        folders_panel_sizeHTML.append(folders_panel_xlarge_sizeHTML);
+        let folders_panel_size_labelHTML = document.createElement("label");
+        this.FileManagerStyles.fmAddClass(folders_panel_size_labelHTML, "fm_color_label");
+        folders_panel_size_labelHTML.classList.add("fm_color_label");
+        this.FileManagerStyles.updatableElements["fm_color_label"].push(folders_panel_size_labelHTML);
+        folders_panel_size_labelHTML.innerHTML = "Folders panel interface:<br>";
+        folders_panel_size_labelHTML.append(folders_panel_sizeHTML);
+        let files_panel_sizeHTML = document.createElement("select");
+        this.FileManagerStyles.fmAddClass(files_panel_sizeHTML, "fm_select_input");
+        files_panel_sizeHTML.classList.add("fm_select_input");
+        files_panel_sizeHTML.name = "files_panel";
+        let files_panel_xsmall_sizeHTML = document.createElement("option");
+        files_panel_xsmall_sizeHTML.value = "xsmall";
+        files_panel_xsmall_sizeHTML.textContent = "xsmall";
+        files_panel_xsmall_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.files_panel === "xsmall";
+        let files_panel_small_sizeHTML = document.createElement("option");
+        files_panel_small_sizeHTML.value = "small";
+        files_panel_small_sizeHTML.textContent = "small";
+        files_panel_small_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.files_panel === "small";
+        let files_panel_medium_sizeHTML = document.createElement("option");
+        files_panel_medium_sizeHTML.value = "medium";
+        files_panel_medium_sizeHTML.textContent = "medium";
+        files_panel_medium_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.files_panel === "medium";
+        let files_panel_large_sizeHTML = document.createElement("option");
+        files_panel_large_sizeHTML.value = "large";
+        files_panel_large_sizeHTML.textContent = "large";
+        files_panel_large_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.files_panel === "large";
+        let files_panel_xlarge_sizeHTML = document.createElement("option");
+        files_panel_xlarge_sizeHTML.value = "xlarge";
+        files_panel_xlarge_sizeHTML.textContent = "xlarge";
+        files_panel_xlarge_sizeHTML.selected = this.FileManagerStyles.fileManagerMutableStyles.sizing.files_panel === "xlarge";
+        files_panel_sizeHTML.append(files_panel_xsmall_sizeHTML);
+        files_panel_sizeHTML.append(files_panel_small_sizeHTML);
+        files_panel_sizeHTML.append(files_panel_medium_sizeHTML);
+        files_panel_sizeHTML.append(files_panel_large_sizeHTML);
+        files_panel_sizeHTML.append(files_panel_xlarge_sizeHTML);
+        let files_panel_size_labelHTML = document.createElement("label");
+        this.FileManagerStyles.fmAddClass(files_panel_size_labelHTML, "fm_color_label");
+        files_panel_size_labelHTML.classList.add("fm_color_label");
+        this.FileManagerStyles.updatableElements["fm_color_label"].push(files_panel_size_labelHTML);
+        files_panel_size_labelHTML.innerHTML = "Files panel interface:<br>";
+        files_panel_size_labelHTML.append(files_panel_sizeHTML);
         let buttons_panelHTML = document.createElement("div");
         this.FileManagerStyles.fmAddClass(buttons_panelHTML, "fm_buttons_panel");
         buttons_panelHTML.classList.add("fm_buttons_panel");
@@ -2322,6 +2606,10 @@ class FileManager {
         params_panelHTML.append(border_color_labelHTML);
         params_panelHTML.append(select_color_labelHTML);
         params_panelHTML.append(text_color_labelHTML);
+        params_panelHTML.append(navigation_size_labelHTML);
+        params_panelHTML.append(tools_size_labelHTML);
+        params_panelHTML.append(folders_panel_size_labelHTML);
+        params_panelHTML.append(files_panel_size_labelHTML);
         buttons_panelHTML.append(message_submitHTML);
         buttons_panelHTML.append(reset_settings_buttonHTML);
         buttons_panelHTML.append(submit_settings_buttonHTML);
