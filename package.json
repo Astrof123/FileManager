@@ -1,25 +1,30 @@
 {
-  "name": "filemanager-vanilla",
-  "version": "2.0.0",
-  "description": "Vanilla Javascript file manager",
-  "main": "dist/filemanager.bundle.mjs",
-  "module": "src/filemanager.js",
-  "browser": "dist/filemanager.bundle.mjs",
+  "name": "vanilla-filemanager",
+  "version": "1.0.1",
+  "description": "Vanilla Javascript filemanager",
+  "main": "dist/filemanager.bundle.js",
+  "module": "dist/filemanager.bundle.js",
+  "unpkg": "dist/filemanager.bundle.js",
+  "browser": "dist/filemanager.bundle.js",
   "scripts": {
     "build": "webpack"
   },
   "keywords": [
-    "file",
-    "manager"
+    "filemanager",
+    "manager",
+    "vanilla js",
+    "free"
   ],
   "author": "Gleb Valeev",
   "license": "MIT",
   "devDependencies": {
-    "webpack": "^5.96.1",
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "babel-loader": "^10.0.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
+    "webpack": "^5.98.0",
     "webpack-cli": "^5.1.4"
   },
-  "type": "module",
-  "exports": {
-    ".": "./dist/filemanager.bundle.mjs"
-  }
+  "type": "module"
 }
