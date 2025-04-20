@@ -1,6 +1,6 @@
 {
   "name": "vanilla-filemanager",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Vanilla Javascript filemanager",
   "main": "dist/filemanager.js",
   "module": "dist/filemanager.js",
@@ -16,7 +16,8 @@
     "filemanager",
     "manager",
     "vanilla js",
-    "free"
+    "free",
+    "files"
   ],
   "author": "Gleb Valeev",
   "license": "MIT",
