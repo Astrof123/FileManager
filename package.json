@@ -1,13 +1,16 @@
 {
   "name": "vanilla-filemanager",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Vanilla Javascript filemanager",
-  "main": "dist/filemanager.bundle.js",
-  "module": "dist/filemanager.bundle.js",
-  "unpkg": "dist/filemanager.bundle.js",
-  "browser": "dist/filemanager.bundle.js",
+  "main": "dist/filemanager.js",
+  "module": "dist/filemanager.js",
+  "types": "dist/filemanager.d.ts", 
+  "files": [ 
+    "dist"
+  ],
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "build:types": "tsc"
   },
   "keywords": [
     "filemanager",

@@ -60,7 +60,7 @@ export class FileManagerStyles {
                 width: '100%',
                 height: "100%",
                 "min-height": "300px",
-                "min-width": "550px",
+                "min-width": "300px",
                 display: "flex",
                 "flex-direction": "column",
                 "border-radius": "4px",
@@ -227,7 +227,12 @@ export class FileManagerStyles {
                 flexDirection: 'row',
                 alignItems: 'center',
                 "box-sizing": 'border-box',
-                "padding": "2px 0px"
+                "padding": "2px 0px",
+                // "flex-wrap": "wrap"
+            },
+            "fm_tools_wrapper": {
+                "display": "flex",
+                "flex-wrap": "wrap"
             },
             "fm_filemanager_address": {
                 border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
@@ -314,6 +319,17 @@ export class FileManagerStyles {
                 padding: '0px 8px',
                 color: '#ffff',
                 width: '20%',
+                "font-size": this.settingSizing([14], "address"),
+                "user-select": "none"
+            },
+            "fm_search_mobile": {
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                "border-radius": '4px',
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                padding: '0px 8px',
+                color: '#ffff',
+                width: '100%',
+                "margin-left": "16px",
                 "font-size": this.settingSizing([14], "address"),
                 "user-select": "none"
             },
@@ -640,6 +656,16 @@ export class FileManagerStyles {
             'fm_current_path::-webkit-scrollbar-thumb': {
                 "background-color": '#888',
             },
+            "fm_extra_tools_pane": {
+                display: "flex",
+                "flex-direction": "row",
+                "align-items": "center",
+                border: `3px solid ${this.fileManagerMutableStyles.colors.border}`,
+                "border-top": "none",
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
+                "box-sizing": 'border-box',
+                "padding": "2px 0px",
+            }
         };
     }
     

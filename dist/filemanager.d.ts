@@ -129,6 +129,11 @@ export declare class FileManager {
     private addressPane;
     private options;
     private lastFile;
+    private isMobileVersion;
+    private navigationPane;
+    private extraToolsPane;
+    private isTabletVersion;
+    private timerTouching;
     private settingsColorInput;
     private settingsInterfaceSelect;
     private filesTilesElement;
@@ -165,6 +170,7 @@ export declare class FileManager {
     handleUpArrowClick(event: Event): void;
     handleRefreshClick(event: Event): Promise<void>;
     handleUploadClick(event: Event): void;
+    submitSettings(mutableStyles: IfileManagerStyles, isInit: boolean): void;
     handleSubmitSettings(event: Event): void;
     handleResetSettings(event: Event): void;
     handleSearchChange(event: Event): Promise<void>;
@@ -176,6 +182,7 @@ export declare class FileManager {
     private searchOpenFoldersRecursion;
     private updateNavFolders;
     handleUploadingFolder(event: Event): Promise<void>;
+    private openFileListFolder;
     handleOpenFileListFolder(event: Event): Promise<void>;
     private updateRemove;
     private updateDownload;
@@ -202,6 +209,8 @@ export declare class FileManager {
     private getInternalFolders;
     private startLoading;
     private endLoading;
+    handleTouchFolderStart(event: Event): void;
+    handleTouchFolderEnd(event: Event): void;
     private getInternalFiles;
     private updateSettingsColorInputs;
     private updateSettingsInterfaceSelects;
@@ -214,8 +223,3 @@ export declare class FileManager {
     updateInterface(): Promise<void>;
     private initInterface;
 }
-declare const FileManagerLibrary: {
-    FileManager: typeof FileManager;
-    FileManagerServer: typeof FileManagerServer;
-};
-export default FileManagerLibrary;

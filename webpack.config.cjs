@@ -4,10 +4,14 @@ module.exports = {
   entry: './src/filemanager.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'filemanager.bundle.js', 
-    library: 'FileManagerLibrary', 
-    libraryTarget: 'umd', 
-    globalObject: 'this', 
+    filename: 'filemanager.js',
+    library: {
+      type: 'module'
+    },
+    globalObject: 'this',
+  },
+  experiments: {  
+    outputModule: true
   },
   module: {
     rules: [

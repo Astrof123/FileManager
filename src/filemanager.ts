@@ -1,5 +1,6 @@
 import { IfileManagerStyles, FileManagerStyles } from './filemanager-styles';
 
+
 export type folder = {
     name: string
 }
@@ -186,7 +187,7 @@ export class FileManager {
             "Tools Pane interface": "Интерфейс панели инструментов",
             "Navigation Pane interface": "Интерфейс панели навигации",
             "Content Pane interface": "Интерфейс панели контента",
-            "Settings Pane interface": "Интерфейс панели настроек:",
+            "Settings Pane interface": "Интерфейс панели настроек",
             "medium": "средний",
             "xsmall": "очень маленький",
             "small": "маленький",
@@ -358,6 +359,11 @@ export class FileManager {
     private addressPane: HTMLElement|null = null;
     private options;
     private lastFile: HTMLElement|null = null;
+    private isMobileVersion: boolean = false;
+    private navigationPane: HTMLElement|null = null;
+    private extraToolsPane: HTMLElement|null = null;
+    private isTabletVersion: boolean = false;
+    private timerTouching: null|NodeJS.Timeout = null;
 
     private settingsColorInput: {
         [index: string]: HTMLInputElement
@@ -552,7 +558,7 @@ export class FileManager {
             throw new Error('The hierarchy of elements was violated');
         }
 
-        if (this.options?.addressPaneOptions?.addressPaneEnabled) {
+        if (this.options?.addressPaneOptions?.addressPaneEnabled && !this.isMobileVersion) {
             bufferChecker = this.filemanager_root.querySelector(".fm_current_path");
             if (bufferChecker instanceof HTMLElement) {
                 this.currentPathElem = bufferChecker;
@@ -677,6 +683,35 @@ export class FileManager {
 
         this.updateListDisplayIcon();
         this.updateTilesDisplayIcon();
+
+        if (this.isMobileVersion) {
+            let newMutableStyles = {
+                "colors": this.FileManagerStyles.fileManagerMutableStyles["colors"],
+                "sizing": {
+                    tools: "xsmall",
+                    address: "small",
+                    content_pane: "small",
+                    navigation_pane: "small",
+                    settings_panel: "xsmall",
+                }
+            };
+
+            this.submitSettings(newMutableStyles, true);
+        }
+        if (this.isTabletVersion) {
+            let newMutableStyles = {
+                "colors": this.FileManagerStyles.fileManagerMutableStyles["colors"],
+                "sizing": {
+                    tools: "small",
+                    address: "medium",
+                    content_pane: "medium",
+                    navigation_pane: "medium",
+                    settings_panel: "small",
+                }
+            };
+
+            this.submitSettings(newMutableStyles, true);
+        }
     }
 
     private createHTMLFileList(file: file, draggable = true): HTMLElement {
@@ -1435,11 +1470,60 @@ export class FileManager {
         }
     }
 
+    public submitSettings(mutableStyles: IfileManagerStyles, isInit: boolean) {
+        if (this.options?.toolsPaneOptions?.settingsOptions?.settingsEnabled) {    
+            this.FileManagerStyles.setMutableStyles(mutableStyles);
+            this.FileManagerStyles.updateMutableStyles();
+            this.FileManagerStyles.updateFileManagerStyles();
+            this.FileManagerStyles.updateFileManagerHeaderStyles();
+            this.FileManagerStyles.updateHeaderStyles();
+            this.FileManagerStyles.updateUpdatableElements();
+
+            if (!isInit) {
+                this.mainPanel.style.display = "none";
+    
+                if (this.toolsPane !== null) {
+                    this.toolsPane.style.display = "none";
+                }
+                
+                if ((this.options?.addressPaneOptions?.addressPaneEnabled) && this.addressPane !== null) {
+                    this.addressPane.style.display = "none";
+                }
+        
+                if (this.uploadFilesPanel !== null) {
+                    this.FileManagerStyles.fmAddClass(this.uploadFilesPanel, "fm_hidden");
+                }
+    
+                if (this.navigationPane instanceof HTMLElement && (this.options?.navigationPaneEnabled !== null || this.isMobileVersion || this.isTabletVersion)) {
+                    this.FileManagerStyles.fmAddClass(this.navigationPane, "fm_hidden");
+                }
+        
+                let message_submitHTML = this.filemanager_root.querySelector(".fm_message_submit");
+                if (message_submitHTML instanceof HTMLElement) {
+                    message_submitHTML.textContent = this.translations[this.currentLang]["Success"];
+        
+                    setTimeout(() => {
+                        message_submitHTML.textContent = "";
+                    }, 2000);
+                }
+            }
+            else if (this.navigationPane) {
+                if (this.isMobileVersion || this.isTabletVersion) {
+                    this.FileManagerStyles.fmAddClass(this.navigationPane, "fm_hidden");
+                }
+
+                if (this.uploadFilesPanel !== null) {
+                    this.FileManagerStyles.fmAddClass(this.uploadFilesPanel, "fm_hidden");
+                }
+            }
+
+        }
+    }
+
     public handleSubmitSettings(event: Event) {
         event.preventDefault();
 
-        if (this.options?.toolsPaneOptions?.settingsOptions?.settingsEnabled && this.settingsForm) {
-
+        if (this.settingsForm) {
             let newMutableStyles = {
                 "colors": {
                     hover: this.settingsForm.hover_color.value,
@@ -1456,37 +1540,9 @@ export class FileManager {
                     settings_panel: this.settingsForm.settings_panel.value,
                 }
             };
-    
-            this.FileManagerStyles.setMutableStyles(newMutableStyles);
-            this.FileManagerStyles.updateMutableStyles();
-            this.FileManagerStyles.updateFileManagerStyles();
-            this.FileManagerStyles.updateFileManagerHeaderStyles();
-            this.FileManagerStyles.updateHeaderStyles();
-            this.FileManagerStyles.updateUpdatableElements();
-            this.mainPanel.style.display = "none";
-    
-            if (this.toolsPane !== null) {
-                this.toolsPane.style.display = "none";
-            }
-            
-            if ((this.options?.addressPaneOptions?.addressPaneEnabled) && this.addressPane !== null) {
-                this.addressPane.style.display = "none";
-            }
-    
-            if (this.uploadFilesPanel !== null) {
-                this.FileManagerStyles.fmAddClass(this.uploadFilesPanel, "fm_hidden");
-            }
-    
-            let message_submitHTML = this.filemanager_root.querySelector(".fm_message_submit");
-            if (message_submitHTML instanceof HTMLElement) {
-                message_submitHTML.textContent = this.translations[this.currentLang]["Success"];
-    
-                setTimeout(() => {
-                    message_submitHTML.textContent = "";
-                }, 2000);
-            }
-        }
-        
+
+            this.submitSettings(newMutableStyles, false);
+        }   
     }
 
     public handleResetSettings(event: Event) {
@@ -1724,9 +1780,7 @@ export class FileManager {
         }
     }
 
-    public async handleOpenFileListFolder(event: Event) {
-        event.stopPropagation();
-
+    private async openFileListFolder(event: Event) {
         if (event.target != null && event.target instanceof HTMLElement) {
             if (this.currentFolder != null) {
                 await this.openCloseFolder(this.currentFolder, 'filelist');
@@ -1785,7 +1839,11 @@ export class FileManager {
                 throw new Error('The hierarchy of elements was violated');
             } 
         }
+    }
 
+    public async handleOpenFileListFolder(event: Event) {
+        event.stopPropagation();
+        this.openFileListFolder(event);
     }
 
     private updateRemove() {
@@ -2243,6 +2301,10 @@ export class FileManager {
                 this.mainPanel.style.display = "flex";
                 if (this.toolsPane !== null) {
                     this.toolsPane.style.display = "flex";
+
+                    if (this.isMobileVersion && this.extraToolsPane) {
+                        this.extraToolsPane.style.display = "flex";
+                    }
                 }
                 if ((this.options?.addressPaneOptions?.addressPaneEnabled) && this.addressPane) {
                     this.addressPane.style.display = "flex";
@@ -2253,30 +2315,39 @@ export class FileManager {
                 this.mainPanel.style.display = "none";
                 if (this.toolsPane !== null) {
                     this.toolsPane.style.display = "none";
+
+                    if (this.isMobileVersion && this.extraToolsPane) {
+                        this.extraToolsPane.style.display = "none";
+                    }
                 }
     
                 if ((this.options?.addressPaneOptions?.addressPaneEnabled) && this.addressPane) {
                     this.addressPane.style.display = "none";
                 }
+
+                
             }
         }
     }
 
     public async handleKeyDown(event: KeyboardEvent) {
-        // Ctrl+C
-        if (event.ctrlKey && event.key === 'c') {
-            this.copyFiles()
+        // Ctrl/Cmd + C
+        if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
+            event.preventDefault();
+            this.copyFiles();
         }
-        // Ctrl+V
-        else if (event.ctrlKey && event.key === 'v') {
+        // Ctrl/Cmd + V
+        else if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+            event.preventDefault();
             await this.insertFiles();
         }
-        // Ctrl+X
-        else if (event.ctrlKey && event.key === 'x') {
+        // Ctrl/Cmd + X
+        else if ((event.ctrlKey || event.metaKey) && event.key === 'x') {
+            event.preventDefault();
             this.cutFiles();
         }
-        
     }
+    
 
     public handleInsert(event: Event) {
         if (this.searchingString !== "") {
@@ -2494,6 +2565,19 @@ export class FileManager {
         }
     }
 
+    public handleTouchFolderStart(event: Event) {
+        let bufferThis = this;
+        this.timerTouching = setTimeout(function() {
+            bufferThis.openFileListFolder(event);
+          }, 500);
+    }
+
+    public handleTouchFolderEnd(event: Event) {
+        if (this.timerTouching) {
+            clearTimeout(this.timerTouching);
+        }
+    }
+
     private async getInternalFiles(path: string) {
         let files: file[];
         this.startLoading();
@@ -2532,6 +2616,8 @@ export class FileManager {
 
                         if (file.isFolder) {
                             file_block.addEventListener("dblclick", this.handleOpenFileListFolder.bind(this));
+                            file_block.addEventListener("touchstart", this.handleTouchFolderStart.bind(this));
+                            file_block.addEventListener("touchend", this.handleTouchFolderEnd.bind(this));
                         }
                     }
                     else {
@@ -2566,6 +2652,8 @@ export class FileManager {
 
                         if (file.isFolder) {
                             file_block.addEventListener("dblclick", this.handleOpenFileListFolder.bind(this));
+                            file_block.addEventListener("touchstart", this.handleTouchFolderStart.bind(this));
+                            file_block.addEventListener("touchend", this.handleTouchFolderEnd.bind(this));
                         }
                     }
                     else {
@@ -2931,6 +3019,15 @@ export class FileManager {
     }
 
     private initInterface(): HTMLElement {
+        let rootWidthString = this.root.style.width.match(/\d+/);
+        let rootWidthNumber = Number(rootWidthString);
+        if (rootWidthNumber < 450) {
+            this.isMobileVersion = true;
+        }
+        else if (rootWidthNumber < 730) {
+            this.isTabletVersion = true;
+        }
+
         let filemanager_super_root = document.createElement("div");
         this.FileManagerStyles.fmAddClass(filemanager_super_root, "fm_super_root");
         filemanager_super_root.id = "fm_super_root";
@@ -3017,33 +3114,52 @@ export class FileManager {
                     arrows_blockHTML.append(arrow_refreshHTML);
                 }
             }
-    
-            current_pathHTML = document.createElement("div");
-            this.FileManagerStyles.fmAddClass(current_pathHTML, "fm_current_path");
-            current_pathHTML.classList.add("fm_current_path");
-            this.FileManagerStyles.updatableElements["fm_current_path"] = [current_pathHTML];
-    
-            if (this.options?.addressPaneOptions?.searchingEnabled == true) {
-                let searchHTML = document.createElement("input");
-                searchHTML.type = "search";
-                searchHTML.placeholder = this.translations[this.currentLang]["Searching"];
-                this.FileManagerStyles.fmAddClass(searchHTML, "fm_search");
-                searchHTML.classList.add("fm_search");
-                this.FileManagerStyles.updatableElements["fm_search"] = [searchHTML];
-                searchHTML.addEventListener("change", this.handleSearchChange.bind(this))
-
-                filemanager_addressHTML.append(searchHTML);
+            
+            if (!this.isMobileVersion) {
+                current_pathHTML = document.createElement("div");
+                this.FileManagerStyles.fmAddClass(current_pathHTML, "fm_current_path");
+                current_pathHTML.classList.add("fm_current_path");
+                this.FileManagerStyles.updatableElements["fm_current_path"] = [current_pathHTML];
             }
 
-            let path_folderHTML = document.createElement("span");
-            this.FileManagerStyles.fmAddClass(path_folderHTML, "fm_path_folder");
-            path_folderHTML.classList.add("fm_path_folder");
-            this.FileManagerStyles.updatableElements["fm_path_folder"] = [path_folderHTML];
-            path_folderHTML.textContent = this.rootFolderName;
     
-            current_pathHTML.append(path_folderHTML);
+            if (this.options?.addressPaneOptions?.searchingEnabled == true) {
+                if (this.isMobileVersion) {
+                    let searchHTML = document.createElement("input");
+                    searchHTML.type = "search";
+                    searchHTML.placeholder = this.translations[this.currentLang]["Searching"];
+                    this.FileManagerStyles.fmAddClass(searchHTML, "fm_search_mobile");
+                    searchHTML.classList.add("fm_search");
+                    this.FileManagerStyles.updatableElements["fm_search_mobile"] = [searchHTML];
+                    searchHTML.addEventListener("change", this.handleSearchChange.bind(this))
+    
+                    filemanager_addressHTML.append(searchHTML);
+                }
+                else {
+                    let searchHTML = document.createElement("input");
+                    searchHTML.type = "search";
+                    searchHTML.placeholder = this.translations[this.currentLang]["Searching"];
+                    this.FileManagerStyles.fmAddClass(searchHTML, "fm_search");
+                    searchHTML.classList.add("fm_search");
+                    this.FileManagerStyles.updatableElements["fm_search"] = [searchHTML];
+                    searchHTML.addEventListener("change", this.handleSearchChange.bind(this))
+    
+                    filemanager_addressHTML.append(searchHTML);
+                }
+            }
 
-            filemanager_addressHTML.prepend(current_pathHTML);
+            if (!this.isMobileVersion && current_pathHTML) {
+                let path_folderHTML = document.createElement("span");
+                this.FileManagerStyles.fmAddClass(path_folderHTML, "fm_path_folder");
+                path_folderHTML.classList.add("fm_path_folder");
+                this.FileManagerStyles.updatableElements["fm_path_folder"] = [path_folderHTML];
+                path_folderHTML.textContent = this.rootFolderName;
+        
+                current_pathHTML.append(path_folderHTML);
+    
+                filemanager_addressHTML.prepend(current_pathHTML);
+            }
+
             if (arrows_blockHTML) {
                 
                 filemanager_addressHTML.prepend(arrows_blockHTML);
@@ -3159,6 +3275,15 @@ export class FileManager {
                 filemanager_toolsHTML.append(add_file_buttonHTML);
             }
 
+            let extraToolsPane;
+            if (this.isMobileVersion) {
+                extraToolsPane = document.createElement("div");
+                this.FileManagerStyles.fmAddClass(extraToolsPane, "fm_extra_tools_pane");
+                extraToolsPane.classList.add("fm_extra_tools_pane");
+                this.extraToolsPane = extraToolsPane;
+            }
+
+
             if (this.options?.toolsPaneOptions?.toolsEnabled?.movingFiles) {
                 let cutHTML = document.createElement("img");
                 cutHTML.src = this.iconsPaths.cut;
@@ -3195,9 +3320,16 @@ export class FileManager {
                     this.FileManagerStyles.updatableElements["fm_tool"] = [insertHTML];
                 }
 
-                filemanager_toolsHTML.append(cutHTML);
-                filemanager_toolsHTML.append(copyHTML);
-                filemanager_toolsHTML.append(insertHTML);
+                if (this.isMobileVersion) {
+                    extraToolsPane?.append(cutHTML);
+                    extraToolsPane?.append(copyHTML);
+                    extraToolsPane?.append(insertHTML);
+                }
+                else {
+                    filemanager_toolsHTML.append(cutHTML);
+                    filemanager_toolsHTML.append(copyHTML);
+                    filemanager_toolsHTML.append(insertHTML);
+                }
             }
 
             if (this.options?.toolsPaneOptions?.toolsEnabled?.renamingFiles) {
@@ -3217,7 +3349,12 @@ export class FileManager {
                     this.FileManagerStyles.updatableElements["fm_tool"] = [renameHTML];
                 }
 
-                filemanager_toolsHTML.append(renameHTML);
+                if (this.isMobileVersion) {
+                    extraToolsPane?.append(renameHTML);
+                }
+                else {
+                    filemanager_toolsHTML.append(renameHTML);
+                }
             }
     
             if (this.options?.toolsPaneOptions?.toolsEnabled?.deletingFiles) {
@@ -3237,7 +3374,12 @@ export class FileManager {
                     this.FileManagerStyles.updatableElements["fm_tool"] = [removeHTML];
                 }
 
-                filemanager_toolsHTML.append(removeHTML);
+                if (this.isMobileVersion) {
+                    extraToolsPane?.append(removeHTML);
+                }
+                else {
+                    filemanager_toolsHTML.append(removeHTML);
+                }
             }
 
             if (this.options?.toolsPaneOptions?.toolsEnabled?.downloadingFiles) {
@@ -3256,7 +3398,13 @@ export class FileManager {
                     this.FileManagerStyles.updatableElements["fm_tool"] = [downloadHTML];
                 }
 
-                filemanager_toolsHTML.append(downloadHTML);
+                if (this.isMobileVersion) {
+                    extraToolsPane?.append(downloadHTML);
+                }
+                else {
+                    filemanager_toolsHTML.append(downloadHTML);
+
+                }
             }
 
             if (this.options?.toolsPaneOptions?.toolsEnabled?.createFiles) {
@@ -3273,9 +3421,7 @@ export class FileManager {
                 }
                 else {
                     this.FileManagerStyles.updatableElements["fm_tool"] = [createFileHTML];
-                }
-
-                filemanager_toolsHTML.append(createFileHTML);
+                }                
 
 
                 let createFolderHTML = document.createElement("img");
@@ -3292,8 +3438,16 @@ export class FileManager {
                 else {
                     this.FileManagerStyles.updatableElements["fm_tool"] = [createFolderHTML];
                 }
+ 
 
-                filemanager_toolsHTML.append(createFolderHTML);
+                if (this.isMobileVersion) {
+                    extraToolsPane?.append(createFileHTML);
+                    extraToolsPane?.append(createFolderHTML);
+                }
+                else {
+                    filemanager_toolsHTML.append(createFileHTML);
+                    filemanager_toolsHTML.append(createFolderHTML);
+                }
             }
 
             let grid_wrapperHTML;
@@ -3380,6 +3534,10 @@ export class FileManager {
                 this.options?.toolsPaneOptions?.toolsEnabled?.downloadingFiles)
             ) {
                 filemanager_super_root.append(filemanager_toolsHTML);
+
+                if (this.isMobileVersion && extraToolsPane) {
+                    filemanager_super_root.append(extraToolsPane);
+                }
             }
         }
         
@@ -3389,6 +3547,7 @@ export class FileManager {
         this.FileManagerStyles.fmAddClass(folders_navHTML, "fm_folders_nav");
         folders_navHTML.classList.add("fm_folders_nav");
         this.FileManagerStyles.updatableElements["fm_folders_nav"] = [folders_navHTML];
+        this.navigationPane = folders_navHTML;
 
         let rootfolder = this.createHTMLNavFolder({name: this.rootFolderName}, folders_navHTML, true);
 
@@ -3406,8 +3565,8 @@ export class FileManager {
             rootfolder_icon_wrapper?.addEventListener("click", this.handleOpenNavFolder.bind(this));
             rootfolder_parent?.addEventListener("click", this.handleShowFileList.bind(this));
         }
-        if (!this.options?.navigationPaneEnabled) {
-            folders_navHTML.style.display = "none";
+        if (!this.options?.navigationPaneEnabled || this.isMobileVersion || this.isTabletVersion) {
+            this.FileManagerStyles.fmAddClass(folders_navHTML, "fm_hidden");
         }
 
         filemanager_mainHTML.append(folders_navHTML);
@@ -3907,13 +4066,8 @@ export class FileManager {
 
         this.root.append(filemanager_super_root);
 
+
+
         return filemanager_super_root;
     }
 }
-
-const FileManagerLibrary = {
-    FileManager: FileManager,
-    FileManagerServer: FileManagerServer
-};
-
-export default FileManagerLibrary;
