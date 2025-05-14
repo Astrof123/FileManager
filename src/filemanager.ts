@@ -1,5 +1,3 @@
-import { IfileManagerStyles, FileManagerStyles } from './filemanager-styles';
-
 
 export type folder = {
     name: string
@@ -57,6 +55,25 @@ export type icons = {
     py: string
 }
 
+
+export type colors = {
+    hover: string,
+    border: string,
+    main_background: string,
+    selected: string,
+    text_color: string
+}
+
+
+export type sizing = {
+    tools: string,
+    address: string,
+    navigation_pane: string,
+    content_pane: string,
+    settings_panel: string
+}
+
+
 export type options = {
     rootFolderName: string,
     icons: icons,
@@ -87,6 +104,9 @@ export type options = {
         },
     },
     navigationPaneEnabled: boolean,
+    theme: string,
+    colors: colors,
+    sizing: sizing
 }
 
 
@@ -135,7 +155,7 @@ export class FileManager {
             "Tools Pane interface": "Tools Pane interface",
             "Navigation Pane interface": "Navigation Pane interface",
             "Content Pane interface": "Content Pane interface",
-            "Settings Pane interface": "Settings Pane interface:",
+            "Settings Pane interface": "Settings Pane interface",
             "medium": "medium",
             "xsmall": "xsmall",
             "small": "small",
@@ -239,7 +259,7 @@ export class FileManager {
             "Tools Pane interface": "Werkzeugleisten-Oberfläche",
             "Navigation Pane interface": "Navigationsleisten-Oberfläche",
             "Content Pane interface": "Inhaltsbereich-Oberfläche",
-            "Settings Pane interface": "Einstellungsbereich-Oberfläche:",
+            "Settings Pane interface": "Einstellungsbereich-Oberfläche",
             "medium": "mittel",
             "xsmall": "sehr klein",
             "small": "klein",
@@ -291,7 +311,7 @@ export class FileManager {
             "Tools Pane interface": "Interface du volet d'outils",
             "Navigation Pane interface": "Interface du volet de navigation",
             "Content Pane interface": "Interface du volet de contenu",
-            "Settings Pane interface": "Interface du volet de paramètres:",
+            "Settings Pane interface": "Interface du volet de paramètres",
             "medium": "moyen",
             "xsmall": "très petit",
             "small": "petit",
@@ -363,7 +383,7 @@ export class FileManager {
     private navigationPane: HTMLElement|null = null;
     private extraToolsPane: HTMLElement|null = null;
     private isTabletVersion: boolean = false;
-    private timerTouching: null|NodeJS.Timeout = null;
+    private timerTouching: null|number = null;
 
     private settingsColorInput: {
         [index: string]: HTMLInputElement
@@ -436,7 +456,7 @@ export class FileManager {
         this.options = options;
         this.iconsPaths = this.options?.icons;
         
-        this.FileManagerStyles = new FileManagerStyles(customStyles)
+        this.FileManagerStyles = new FileManagerStyles(customStyles, this.options.theme, this.options.colors , this.options.sizing)
 
         for (let key in customLanguages) {
             this.translations[key] = customLanguages[key];
@@ -453,6 +473,9 @@ export class FileManager {
             this.filesDisplayMode = localStorage.fmFilesDisplayMode;
         }
         else {
+            if (this.options?.toolsPaneOptions?.defaultFileDisplayMode && this.options?.toolsPaneOptions?.defaultFileDisplayMode !== "list" && this.options?.toolsPaneOptions?.defaultFileDisplayMode !== "tiles") {
+                this.options.toolsPaneOptions.defaultFileDisplayMode = "list";
+            }
             localStorage.fmFilesDisplayMode = this.options?.toolsPaneOptions?.defaultFileDisplayMode ? this.options?.toolsPaneOptions?.defaultFileDisplayMode : "list";
             this.filesDisplayMode = this.options?.toolsPaneOptions?.defaultFileDisplayMode ? this.options?.toolsPaneOptions?.defaultFileDisplayMode : "list";
         }
@@ -1432,8 +1455,7 @@ export class FileManager {
 
         if (this.lastFolders.length > 0) {
             let lastFolder = this.lastFolders.pop();
-
-            if (lastFolder) {
+            if (lastFolder && lastFolder.isConnected) {
                 this.resetSearching();
                 this.updateFileList(lastFolder, true);
             }
@@ -1494,9 +1516,9 @@ export class FileManager {
                     this.FileManagerStyles.fmAddClass(this.uploadFilesPanel, "fm_hidden");
                 }
     
-                if (this.navigationPane instanceof HTMLElement && (this.options?.navigationPaneEnabled !== null || this.isMobileVersion || this.isTabletVersion)) {
-                    this.FileManagerStyles.fmAddClass(this.navigationPane, "fm_hidden");
-                }
+                // if (this.navigationPane instanceof HTMLElement && (this.options?.navigationPaneEnabled !== null || this.isMobileVersion || this.isTabletVersion)) {
+                //     this.FileManagerStyles.fmAddClass(this.navigationPane, "fm_hidden");
+                // }
         
                 let message_submitHTML = this.filemanager_root.querySelector(".fm_message_submit");
                 if (message_submitHTML instanceof HTMLElement) {
@@ -2213,15 +2235,16 @@ export class FileManager {
                     
 
                         await this.FileManagerServer.copyFileOrFolder(`${filePath}`, `${this.currentPath}/${insert_element_name}`);
-                        
-                        if (this.currentFolder instanceof HTMLElement) {
-                            await this.updateNavFolders();
-                            this.updateFileList(this.currentFolder, true);
-                        }
-                        else {
-                            throw new Error('The hierarchy of elements was violated');
-                        }
+
                     });
+
+                    if (this.currentFolder instanceof HTMLElement) {
+                        await this.updateNavFolders();
+                        this.updateFileList(this.currentFolder, true);
+                    }
+                    else {
+                        throw new Error('The hierarchy of elements was violated');
+                    }
                     
                 }
                 catch (error) {
@@ -2346,8 +2369,31 @@ export class FileManager {
             event.preventDefault();
             this.cutFiles();
         }
+        else if (event.key === "Delete") {
+            event.preventDefault();
+            let result = window.confirm(this.translations[this.currentLang]["Are you sure you want to delete?"]);
+            if (this.currentFilesPaths.length > 0 && result) {
+                try {
+                    await this.currentFilesPaths.forEach(async filePath => {
+                        await this.FileManagerServer.removeFileOrFolder(filePath);
+                    });
+
+                    if (this.currentFolder instanceof HTMLElement) {
+                        await this.updateNavFolders();
+                        this.updateFileList(this.currentFolder, true);
+                        
+                    }
+                    else {
+                        throw new Error('The hierarchy of elements was violated');
+                    }
+                    
+                }
+                catch (error) {
+                    throw error;
+                }
+            }
+        }
     }
-    
 
     public handleInsert(event: Event) {
         if (this.searchingString !== "") {
@@ -3019,7 +3065,7 @@ export class FileManager {
     }
 
     private initInterface(): HTMLElement {
-        let rootWidthString = this.root.style.width.match(/\d+/);
+        let rootWidthString = this.root.offsetWidth;
         let rootWidthNumber = Number(rootWidthString);
         if (rootWidthNumber < 450) {
             this.isMobileVersion = true;

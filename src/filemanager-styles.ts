@@ -32,9 +32,9 @@ export class FileManagerStyles {
     public customStyles: IfileManagerStyles|null;
     public fileManagerStyles: IfileManagerStyles = {};
     
-    constructor(customStyles: IfileManagerStyles|null = null) {
+    constructor(customStyles: IfileManagerStyles|null = null, theme: string, colors: object, sizing: object) {
         this.customStyles = customStyles;
-        this.setDefaultMutableStyles();
+        this.setDefaultMutableStyles(theme, colors, sizing);
         
         if (localStorage.fmMutableStyles) {
             this.updateMutableStyles();
@@ -53,7 +53,7 @@ export class FileManagerStyles {
     }
 
     public updateFileManagerStyles() {
-        this.fileManagerStyles = {
+        this.fileManagerStyles = {  
             "fm_super_root": {
                 "box-sizing": 'border-box',
                 fontFamily: "inherit",
@@ -138,7 +138,7 @@ export class FileManagerStyles {
                 "width": "100%",
                 "border-radius": '4px',
                 overflowY: 'auto',
-                height: '100%',
+                // height: '100%',
             },
             "fm_filemanager_main": {
                 display: 'flex',
@@ -257,6 +257,8 @@ export class FileManagerStyles {
                 padding: this.settingSizing([8, 12], "address"),
                 "border-radius": '4px',
                 cursor: 'pointer',
+                "display": "flex",
+                "align-items": "center"
             },
             "fm_add_file_button": {
                 color: this.fileManagerMutableStyles.colors.text_color,
@@ -317,7 +319,7 @@ export class FileManagerStyles {
                 "border-radius": '4px',
                 "background-color": this.fileManagerMutableStyles.colors.main_background,
                 padding: '0px 8px',
-                color: '#ffff',
+                color: this.fileManagerMutableStyles.colors.text_color,
                 width: '20%',
                 "font-size": this.settingSizing([14], "address"),
                 "user-select": "none"
@@ -345,7 +347,7 @@ export class FileManagerStyles {
             "fm_upload_files_block": {
                 display: 'flex',
                 flexDirection: 'column',
-                "background-color": this.fileManagerMutableStyles.colors.hover,
+                "background-color": this.fileManagerMutableStyles.colors.main_background,
                 width: this.settingSizing([191], "tools"),
                 border: this.settingSizing([3], "tools") + ` solid ${this.fileManagerMutableStyles.colors.border}`,
                 borderTop: 'none',
@@ -638,7 +640,7 @@ export class FileManagerStyles {
                 "background-color": this.fileManagerMutableStyles.colors.hover,
             },
             "fm_upload_files_func_wrapper:hover": {
-                "background-color": this.fileManagerMutableStyles.colors.selected,
+                "background-color": this.fileManagerMutableStyles.colors.hover,
             },
             "fm_submit_settings_button:hover": {
                 "background-color": "#94be41",
@@ -667,6 +669,18 @@ export class FileManagerStyles {
                 "padding": "2px 0px",
             }
         };
+
+        if (this.customStyles != null) {
+            for (let selector in this.customStyles) {
+                if (selector.includes(":hover")) {
+                    if (selector in this.fileManagerHeaderStyles) {
+                        for (let style in this.customStyles[selector]) {
+                            this.fileManagerHeaderStyles[selector][style] = this.customStyles[selector][style];
+                        }
+                    }
+                }
+            }
+        }
     }
     
     public fmAddClass(element: HTMLElement, classname: string) {
@@ -700,7 +714,7 @@ export class FileManagerStyles {
         let multy: number = 1;
 
         if (this.fileManagerMutableStyles.sizing[panel] === "xsmall") {
-            multy = 0.75;
+            multy = 0.8;
         }
         else if (this.fileManagerMutableStyles.sizing[panel] === "small") {
             multy = 0.9;
@@ -709,10 +723,10 @@ export class FileManagerStyles {
             multy = 1;
         }
         else if (this.fileManagerMutableStyles.sizing[panel] === "large") {
-            multy = 1.2;
+            multy = 1.1;
         }
         else if (this.fileManagerMutableStyles.sizing[panel] === "xlarge") {
-            multy = 1.4;
+            multy = 1.2;
         }
 
         for (let i = 0; i < settings.length; i++) {
@@ -769,22 +783,48 @@ export class FileManagerStyles {
         return JSON.parse(localStorage.fmDefaultMutableStyles);
     }
 
-    public setDefaultMutableStyles() {
-        let defaultMutableStyles = {
-            "colors": {
+    public setDefaultMutableStyles(theme: string, colors: object, sizing: object) {
+        let defaultColors;
+        
+        if (colors) {
+            defaultColors = colors;
+        }
+        else if (theme == "light") {
+            defaultColors = {
+                hover: "#E3E3E3",
+                border: "#A6A6A6",
+                main_background: "#F4F4F5",
+                selected: "#BEBEBF",
+                text_color: "#000000"
+            }
+        }
+        else {
+            defaultColors = {
                 hover: "#3e3e3e",
                 border: "#2B2B2B",
                 main_background: "#252526",
                 selected: "#4a4a4a",
                 text_color: "#ffffff"
-            },
-            "sizing": {
+            }
+        }
+
+        let defaultSizing;
+        if (sizing) {
+            defaultSizing = sizing;
+        }
+        else {
+            defaultSizing = {
                 tools: "medium",
                 address: "medium",
                 navigation_pane: "medium",
                 content_pane: "medium",
                 settings_panel: "medium"
             }
+        }
+
+        let defaultMutableStyles = {
+            "colors": defaultColors,
+            "sizing": defaultSizing
         };
 
         localStorage.fmDefaultMutableStyles = JSON.stringify(defaultMutableStyles);
