@@ -52,6 +52,20 @@ export type icons = {
     zipFolder: string;
     py: string;
 };
+export type colors = {
+    hover: string;
+    border: string;
+    main_background: string;
+    selected: string;
+    text_color: string;
+};
+export type sizing = {
+    tools: string;
+    address: string;
+    navigation_pane: string;
+    content_pane: string;
+    settings_panel: string;
+};
 export type options = {
     rootFolderName: string;
     icons: icons;
@@ -82,6 +96,9 @@ export type options = {
         };
     };
     navigationPaneEnabled: boolean;
+    theme: string;
+    colors: colors;
+    sizing: sizing;
 };
 export declare abstract class FileManagerServer {
     abstract getFolders(path: string): Promise<folder[]>;

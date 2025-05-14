@@ -12,7 +12,7 @@ export declare class FileManagerStyles {
     fileManagerHeaderStyles: IfileManagerStyles;
     customStyles: IfileManagerStyles | null;
     fileManagerStyles: IfileManagerStyles;
-    constructor(customStyles?: IfileManagerStyles | null);
+    constructor(customStyles: (IfileManagerStyles | null) | undefined, theme: string, colors: object, sizing: object);
     updateFileManagerStyles(): void;
     updateFileManagerHeaderStyles(): void;
     fmAddClass(element: HTMLElement, classname: string): void;
@@ -23,6 +23,6 @@ export declare class FileManagerStyles {
     updateMutableStyles(): void;
     setMutableStyles(mutableStyles: IfileManagerStyles): void;
     getDefaultMutableStyles(): any;
-    setDefaultMutableStyles(): void;
+    setDefaultMutableStyles(theme: string, colors: object, sizing: object): void;
     addRotationAnimation(element: HTMLElement): void;
 }

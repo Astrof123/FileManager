@@ -1,3 +1,4 @@
+import { IfileManagerStyles, FileManagerStyles } from './filemanager-styles'
 
 export type folder = {
     name: string
@@ -383,7 +384,7 @@ export class FileManager {
     private navigationPane: HTMLElement|null = null;
     private extraToolsPane: HTMLElement|null = null;
     private isTabletVersion: boolean = false;
-    private timerTouching: null|number = null;
+    private timerTouching: null|NodeJS.Timeout = null;
 
     private settingsColorInput: {
         [index: string]: HTMLInputElement
